@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
  
-import { StyleSheet, View, Text, Platform, TouchableOpacity, Linking, PermissionsAndroid } from 'react-native';
+import { StyleSheet, View, Text, Platform, TouchableOpacity, Linking, PermissionsAndroid, Alert } from 'react-native';
  
 import { CameraKitCameraScreen, } from 'react-native-camera-kit';
  
@@ -64,7 +64,18 @@ export default class App extends Component {
   }
 
   set_Status_OnOff=()=> {
-    
+    Alert.alert(
+      //title
+      'Hello',
+      //body
+      'I am two option alert. Do you want to cancel me ?',
+      [
+        {text: 'Yes', onPress: () => console.log('Yes Pressed')},
+        {text: 'No', onPress: () => console.log('No Pressed'), style: 'cancel'},
+      ],
+      { cancelable: false }
+      //clicking out side of alert will not cancel
+    );
   }
 
   render() {
