@@ -66,12 +66,12 @@ export default class App extends Component {
   set_Status_OnOff=()=> {
     Alert.alert(
       //title
-      'Hello',
+      'ตรวจสอบข้อมูล',
       //body
       'I am two option alert. Do you want to cancel me ?',
       [
-        {text: 'Yes', onPress: () => console.log('Yes Pressed')},
-        {text: 'No', onPress: () => console.log('No Pressed'), style: 'cancel'},
+        {text: 'ยืนยัน', onPress: () => console.log('ยืนยัน')},
+        {text: 'ยกเลิก', onPress: () => console.log('ยกเลิก'), style: 'cancel'},
       ],
       { cancelable: false }
       //clicking out side of alert will not cancel
