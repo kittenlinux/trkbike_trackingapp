@@ -40,8 +40,8 @@ export default class App extends Component {
         try {
           const granted = await PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.CAMERA, {
-              'title': 'Camera App Permission',
-              'message': 'Camera App needs access to your camera '
+              'title': 'ขอสิทธิ์การใช้กล้องถ่ายรูป',
+              'message': 'แอปพลิเคชันต้องการขอสิทธิ์เพื่อใช้งานกล้อง'
             }
           )
           if (granted === PermissionsAndroid.RESULTS.GRANTED) {
@@ -49,10 +49,10 @@ export default class App extends Component {
             that.setState({ QR_Code_Value: '' });
             that.setState({ Start_Scanner: true });
           } else {
-            alert("CAMERA permission denied");
+            alert("การขอสิทธิ์เพื่อใช้งานกล้องถูกปฏิเสธ");
           }
         } catch (err) {
-          alert("Camera permission err", err);
+          alert("พบปัญหาในการขอสิทธิ์เพื่อใช้งานกล้อง", err);
           console.warn(err);
         }
       }
@@ -68,7 +68,7 @@ export default class App extends Component {
       //title
       'ตรวจสอบข้อมูล',
       //body
-      'I am two option alert. Do you want to cancel me ?',
+      'คิวอาร์โค้ดถูกต้อง ตรวจสอบข้อมูลจากเครื่องแม่ข่ายสำเร็จ !\n\nผู้ใช้งาน : null\nหมายเลขทะเบียน : null\n\nยี่ห้อ รุ่น : null\nสี : null\n\nยืนยันการผูกอุปกรณ์เข้ากับรถจักรยานยนต์ ?',
       [
         {text: 'ยืนยัน', onPress: () => console.log('ยืนยัน')},
         {text: 'ยกเลิก', onPress: () => console.log('ยกเลิก'), style: 'cancel'},
