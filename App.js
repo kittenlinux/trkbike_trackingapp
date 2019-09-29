@@ -65,7 +65,7 @@ export default class App extends Component {
             that.setState({ Start_Scanner: true });
             
           } else {
-            alert("การขอสิทธิ์เพื่อใช้งานกล้องถูกปฏิเสธ");
+            Alert.alert("ผิดพลาด","การขอสิทธิ์เพื่อใช้งานกล้องถูกปฏิเสธ");
           }
         } catch (err) {
           alert("พบปัญหาในการขอสิทธิ์เพื่อใช้งานกล้อง", err);
@@ -146,16 +146,12 @@ export default class App extends Component {
         <CameraKitCameraScreen
           showFrame={true}
           scanBarcode={true}
-          laserColor={'#FF3D00'}
-          frameColor={'#00C853'}
-          colorForScannerFrame={'black'}
+          laserColor={"red"}
+          frameColor={"white"}
           onReadCode={event =>
             this.onQR_Code_Scan_Done(event.nativeEvent.codeStringValue)
           }
-          offsetForScannerFrame = {10}   //(default 30) optional, offset from left and right side of the screen
-          heightForScannerFrame = {300}  //(default 200) optional, change height of the scanner frame
-          colorForScannerFrame = {'red'} //(default white) optional, change colot of the scanner frame
-          actions={{ rightButtonText: 'เสร็จสิ้น', leftButtonText: 'ยกเลิก' }}
+          actions={{ leftButtonText: 'ยกเลิก' }}
           onBottomButtonPressed={(event) => this.onBottomButtonPressed(event)}
         />
  
