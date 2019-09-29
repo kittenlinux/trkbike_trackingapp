@@ -1,38 +1,53 @@
 import React, { Component } from 'react';
  
-import { StyleSheet, View, Text, Platform, TouchableOpacity, Linking, PermissionsAndroid, Alert } from 'react-native';
+import { StyleSheet, View, Text, Platform, TouchableOpacity, Linking, PermissionsAndroid, Alert, ActivityIndicator, BackHandler } from 'react-native';
  
 import { CameraKitCameraScreen, } from 'react-native-camera-kit';
  
 export default class App extends Component {
   constructor() {
- 
     super();
  
     this.state = {
- 
       QR_Code_Value: '',
- 
       Start_Scanner: false,
- 
     };
+  }
+
+  componentDidMount() {
+    this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
+  }
+
+  componentWillUnmount() {
+    this.backHandler.remove()
+  }
+
+  handleBackPress = () => {
+    if(!this.state.Start_Scanner){
+      Alert.alert(
+        'ออกจากโปรแกรม',
+        'คุณต้องการออกไปยังหน้าหลักหรือไม่ ?',
+        [
+          {text: 'ไม่ใช่', onPress: () => console.log('ยกเลิก'), style: 'cancel'},
+          {text: 'ใช่', onPress: () => BackHandler.exitApp()},
+        ],
+        { cancelable: true });
+    }
+    else
+      this.setState({ Start_Scanner: false });
+    return true;
   }
  
   openLink_in_browser = () => {
- 
     Linking.openURL(this.state.QR_Code_Value);
- 
   }
  
   onQR_Code_Scan_Done = (QR_Code) => {
- 
     this.setState({ QR_Code_Value: QR_Code });
- 
     this.setState({ Start_Scanner: false });
   }
  
   open_QR_Code_Scanner=()=> {
- 
     var that = this;
  
     if (Platform.OS === 'android') {
@@ -48,6 +63,7 @@ export default class App extends Component {
  
             that.setState({ QR_Code_Value: '' });
             that.setState({ Start_Scanner: true });
+            
           } else {
             alert("การขอสิทธิ์เพื่อใช้งานกล้องถูกปฏิเสธ");
           }
@@ -78,6 +94,10 @@ export default class App extends Component {
     );
   }
 
+  onBottomButtonPressed=()=>{
+    this.setState({ Start_Scanner: false });
+  }
+
   render() {
     if (!this.state.Start_Scanner) {
  
@@ -85,6 +105,8 @@ export default class App extends Component {
         <View style={styles.MainContainer}>
  
           <Text style={{ fontSize: 22, textAlign: 'center' }}>ยินดีต้อนรับสู่ ลูกข่ายติดตามรถจักรยานยนต์ Track My Bikes</Text>
+
+          <ActivityIndicator size="large" />
  
           <Text style={styles.QR_text}>
             {this.state.QR_Code_Value ? 'Scanned QR Code: ' + this.state.QR_Code_Value : ''}
@@ -119,6 +141,7 @@ export default class App extends Component {
     }
     return (
       <View style={{ flex: 1 }}>
+        <Text>Test</Text>
  
         <CameraKitCameraScreen
           showFrame={true}
@@ -129,12 +152,18 @@ export default class App extends Component {
           onReadCode={event =>
             this.onQR_Code_Scan_Done(event.nativeEvent.codeStringValue)
           }
+          offsetForScannerFrame = {10}   //(default 30) optional, offset from left and right side of the screen
+          heightForScannerFrame = {300}  //(default 200) optional, change height of the scanner frame
+          colorForScannerFrame = {'red'} //(default white) optional, change colot of the scanner frame
+          actions={{ rightButtonText: 'เสร็จสิ้น', leftButtonText: 'ยกเลิก' }}
+          onBottomButtonPressed={(event) => this.onBottomButtonPressed(event)}
         />
  
       </View>
     );
   }
 }
+
 const styles = StyleSheet.create({
  
   MainContainer: {
