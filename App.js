@@ -43,11 +43,37 @@ export default class App extends Component {
   }
  
   onQR_Code_Scan_Done = (QR_Code) => {
-    // Adding fetch code
-    
+    var qrdata, isJSON = '1';
 
-    this.setState({ QR_Code_Value: QR_Code });
-    this.setState({ Start_Scanner: false });
+    try{
+      qrdata = JSON.parse(QR_Code);
+    }
+    catch{
+      Alert.alert('ผิดพลาด','รูปแบบคิวอาร์โค้ดไม่ถูกต้อง โปรดตรวจสอบข้อมูลอีกครั้ง');
+      isJSON = '0';
+    }
+
+    if(isJSON == '1'){
+      // Adding fetch code
+      fetch('https://www.trackmycars.net/bike/Api/V1/register_check/', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstParam: 'yourValue',
+          secondParam: 'yourOtherValue',
+        }),
+      });
+
+      this.setState({ QR_Code_Value: QR_Code });
+      this.setState({ Start_Scanner: false });
+    }
+    else{
+      this.setState({ QR_Code_Value: QR_Code });
+      this.setState({ Start_Scanner: false });
+    }
   }
  
   open_QR_Code_Scanner=()=> {
