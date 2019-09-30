@@ -43,6 +43,9 @@ export default class App extends Component {
   }
  
   onQR_Code_Scan_Done = (QR_Code) => {
+    // Adding fetch code
+    
+
     this.setState({ QR_Code_Value: QR_Code });
     this.setState({ Start_Scanner: false });
   }
@@ -55,8 +58,9 @@ export default class App extends Component {
         try {
           const granted = await PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.CAMERA, {
-              'title': 'ขอสิทธิ์การใช้กล้องถ่ายรูป',
-              'message': 'แอปพลิเคชันต้องการขอสิทธิ์เพื่อใช้งานกล้อง'
+              title: 'ขอสิทธิ์การใช้กล้องถ่ายรูป',
+              message: 'แอปพลิเคชันต้องการขอสิทธิ์เพื่อใช้งานกล้อง',
+              buttonPositive: 'ตกลง'
             }
           )
           if (granted === PermissionsAndroid.RESULTS.GRANTED) {
@@ -68,7 +72,7 @@ export default class App extends Component {
             Alert.alert("ผิดพลาด","การขอสิทธิ์เพื่อใช้งานกล้องถูกปฏิเสธ");
           }
         } catch (err) {
-          alert("พบปัญหาในการขอสิทธิ์เพื่อใช้งานกล้อง", err);
+          Alert.alert("ผิดพลาด","พบปัญหาในการขอสิทธิ์เพื่อใช้งานกล้อง");
           console.warn(err);
         }
       }
@@ -81,16 +85,13 @@ export default class App extends Component {
 
   set_Status_OnOff=()=> {
     Alert.alert(
-      //title
       'ตรวจสอบข้อมูล',
-      //body
       'รูปแบบคิวอาร์โค้ดถูกต้อง ตรวจสอบข้อมูลจากเครื่องแม่ข่ายสำเร็จ !\n\nผู้ใช้งาน : null\nหมายเลขทะเบียน : null\n\nยี่ห้อ รุ่น : null\nสี : null\n\nยืนยันการผูกอุปกรณ์เข้ากับรถจักรยานยนต์ ?',
       [
         {text: 'ยืนยัน', onPress: () => console.log('ยืนยัน')},
         {text: 'ยกเลิก', onPress: () => console.log('ยกเลิก'), style: 'cancel'},
       ],
       { cancelable: false }
-      //clicking out side of alert will not cancel
     );
   }
 
@@ -105,8 +106,6 @@ export default class App extends Component {
         <View style={styles.MainContainer}>
  
           <Text style={{ fontSize: 22, textAlign: 'center' }}>ยินดีต้อนรับสู่ ลูกข่ายติดตามรถจักรยานยนต์ Track My Bikes</Text>
-
-          <ActivityIndicator size="large" />
  
           <Text style={styles.QR_text}>
             {this.state.QR_Code_Value ? 'Scanned QR Code: ' + this.state.QR_Code_Value : ''}
