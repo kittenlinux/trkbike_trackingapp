@@ -65,15 +65,12 @@ export default class App extends Component {
           firstParam: 'yourValue',
           secondParam: 'yourOtherValue',
         }),
+        
       });
+    }
 
-      this.setState({ QR_Code_Value: QR_Code });
-      this.setState({ Start_Scanner: false });
-    }
-    else{
-      this.setState({ QR_Code_Value: QR_Code });
-      this.setState({ Start_Scanner: false });
-    }
+    this.setState({ QR_Code_Value: QR_Code });
+    this.setState({ Start_Scanner: false });
   }
  
   open_QR_Code_Scanner=()=> {
