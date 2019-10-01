@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Alert, BackHandler, Linking, PermissionsAndroid, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { CameraKitCameraScreen } from 'react-native-camera-kit';
+import { getMacAddress } from 'react-native-device-info';
  
 export default class App extends Component {
   constructor() {
@@ -9,8 +10,7 @@ export default class App extends Component {
     this.state = {
       QR_Code_Value: '',
       Start_Scanner: false,
-      loading: false,
-      jsonRspData: []
+      loading: false
     };
   }
 
