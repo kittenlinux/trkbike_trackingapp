@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Alert, BackHandler, Linking, PermissionsAndroid, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { CameraKitCameraScreen } from 'react-native-camera-kit';
-import { getMacAddress } from 'react-native-device-info';
+import DeviceInfo from 'react-native-device-info';
  
 export default class App extends Component {
   constructor() {
@@ -10,11 +10,13 @@ export default class App extends Component {
     this.state = {
       QR_Code_Value: '',
       Start_Scanner: false,
-      loading: false
+      loading: false,
+      mac_addr: ''
     };
   }
 
   componentDidMount() {
+    DeviceInfo.getMacAddress().then(mac => { mac_addr = JSON.stringify(mac); });
     this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
   }
 
@@ -123,13 +125,8 @@ export default class App extends Component {
 
   set_Status_OnOff=()=> {
     Alert.alert(
-      'ตรวจสอบข้อมูล',
-      'รูปแบบคิวอาร์โค้ดถูกต้อง ตรวจสอบข้อมูลจากเครื่องแม่ข่ายสำเร็จ !\n\nผู้ใช้งาน : null\nหมายเลขทะเบียน : null\n\nยี่ห้อ รุ่น : null\nสี : null\n\nยืนยันการผูกอุปกรณ์เข้ากับรถจักรยานยนต์ ?',
-      [
-        {text: 'ยืนยัน', onPress: () => console.log('ยืนยัน')},
-        {text: 'ยกเลิก', onPress: () => console.log('ยกเลิก'), style: 'cancel'},
-      ],
-      { cancelable: false }
+      'ข้อมูล',
+      'หมายเลข MAC Address ของคุณคือ '+mac_addr,
     );
   }
 
