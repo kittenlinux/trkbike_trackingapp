@@ -27,7 +27,6 @@ target 'trkbikeTracking' do
   pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
 
-  pod 'react-native-camera-kit', :path => '../node_modules/react-native-camera-kit'
 
   target 'trkbikeTrackingTests' do
     inherit! :search_paths
