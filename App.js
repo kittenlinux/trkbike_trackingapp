@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
- 
-import { StyleSheet, View, Text, Platform, TouchableOpacity, Linking, PermissionsAndroid, Alert, ActivityIndicator, BackHandler } from 'react-native';
- 
-import { CameraKitCameraScreen, } from 'react-native-camera-kit';
+import { Alert, BackHandler, Linking, PermissionsAndroid, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { CameraKitCameraScreen } from 'react-native-camera-kit';
  
 export default class App extends Component {
   constructor() {
@@ -11,6 +9,8 @@ export default class App extends Component {
     this.state = {
       QR_Code_Value: '',
       Start_Scanner: false,
+      loading: false,
+      jsonRspData: []
     };
   }
 
@@ -54,18 +54,33 @@ export default class App extends Component {
     }
 
     if(isJSON == '1'){
-      // Adding fetch code
       fetch('https://www.trackmycars.net/bike/Api/V1/register_check/', {
         method: 'POST',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          firstParam: 'yourValue',
-          secondParam: 'yourOtherValue',
-        }),
-        
+        body: JSON.stringify(qrdata),
+      })
+      .then((response) => response.json())
+      .then((responseData) => {                   
+        this.setState({
+          loading: false
+        });
+        console.log(JSON.stringify(responseData));
+        console.log(responseData);
+
+        var bikedata = responseData.data;
+
+        Alert.alert(
+          'ตรวจสอบข้อมูล',
+          responseData.message+'\n\nผู้ใช้งาน : '+bikedata.username+'\nหมายเลขทะเบียน : '+bikedata.plate+'\n\nยี่ห้อ รุ่น : '+bikedata.model+'\nสี : '+bikedata.color+'\n\nยืนยันการผูกอุปกรณ์เข้ากับรถจักรยานยนต์ ?',
+          [
+            {text: 'ยืนยัน', onPress: () => console.log('ยืนยัน')},
+            {text: 'ยกเลิก', onPress: () => console.log('ยกเลิก'), style: 'cancel'},
+          ],
+          { cancelable: false }
+        );
       });
     }
 
