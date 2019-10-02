@@ -51,7 +51,7 @@ export default class App extends Component {
       qrdata = JSON.parse(QR_Code);
     }
     catch{
-      Alert.alert('ผิดพลาด','รูปแบบคิวอาร์โค้ดไม่ถูกต้อง โปรดตรวจสอบข้อมูลอีกครั้ง');
+      Alert.alert('ผิดพลาด','รูปแบบคิวอาร์โค้ดไม่ถูกต้อง โปรดตรวจสอบข้อมูลอีกครั้ง',{ cancelable: false });
       isJSON = '0';
     }
 
@@ -74,15 +74,29 @@ export default class App extends Component {
 
         var bikedata = responseData.data;
 
-        Alert.alert(
-          'ตรวจสอบข้อมูล',
-          responseData.message+'\n\nผู้ใช้งาน : '+bikedata.username+'\nหมายเลขทะเบียน : '+bikedata.plate+'\n\nยี่ห้อ รุ่น : '+bikedata.model+'\nสี : '+bikedata.color+'\n\nยืนยันการผูกอุปกรณ์เข้ากับรถจักรยานยนต์ ?',
-          [
-            {text: 'ยืนยัน', onPress: () => console.log('ยืนยัน')},
-            {text: 'ยกเลิก', onPress: () => console.log('ยกเลิก'), style: 'cancel'},
-          ],
-          { cancelable: false }
-        );
+        if(responseData.code=='SUCCESS'){
+          Alert.alert(
+            'ตรวจสอบข้อมูล',
+            responseData.message+'\n\nผู้ใช้งาน : '+bikedata.username+'\nหมายเลขทะเบียน : '+bikedata.plate+'\n\nยี่ห้อ รุ่น : '+bikedata.model+'\nสี : '+bikedata.color+'\n\nยืนยันการผูกอุปกรณ์เข้ากับรถจักรยานยนต์ ?',
+            [
+              {text: 'ยืนยัน', onPress: () => console.log('ยืนยัน')},
+              {text: 'ยกเลิก', onPress: () => console.log('ยกเลิก'), style: 'cancel'},
+            ],
+            { cancelable: false }
+          );
+        } else if(responseData.code=='FAIL'){
+          Alert.alert(
+            'ผิดพลาด',
+            responseData.message+'\n\nโปรดตรวจสอบข้อมูลอีกครั้ง',
+            [
+              {text: 'ยืนยัน', onPress: () => console.log('ยืนยัน')},
+              {text: 'ยกเลิก', onPress: () => console.log('ยกเลิก'), style: 'cancel'},
+            ],
+            { cancelable: false }
+          );
+        }
+
+        
       });
     }
 
