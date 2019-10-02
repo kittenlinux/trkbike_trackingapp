@@ -16,7 +16,7 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    DeviceInfo.getMacAddress().then(mac => { mac_addr = JSON.stringify(mac); });
+    DeviceInfo.getMacAddress().then(mac => { mac_addr = JSON.stringify(mac).slice(1, JSON.stringify(mac).length-1); });
     this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
   }
 
