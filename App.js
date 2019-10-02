@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Alert, BackHandler, Linking, PermissionsAndroid, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { CameraKitCameraScreen } from 'react-native-camera-kit';
 import DeviceInfo from 'react-native-device-info';
+import SQLite from 'react-native-sqlite-storage';
  
 export default class App extends Component {
   constructor() {
