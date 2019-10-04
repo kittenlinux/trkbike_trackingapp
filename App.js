@@ -51,7 +51,7 @@ export default class App extends Component {
       qrdata = JSON.parse(QR_Code);
     }
     catch{
-      Alert.alert('ผิดพลาด','รูปแบบคิวอาร์โค้ดไม่ถูกต้อง โปรดตรวจสอบข้อมูลอีกครั้ง',{ cancelable: false });
+      Alert.alert('ผิดพลาด','รูปแบบคิวอาร์โค้ดไม่ถูกต้อง โปรดตรวจสอบข้อมูลอีกครั้ง');
       isJSON = '0';
     }
 
@@ -87,12 +87,7 @@ export default class App extends Component {
         } else if(responseData.code=='FAIL'){
           Alert.alert(
             'ผิดพลาด',
-            responseData.message+'\n\nโปรดตรวจสอบข้อมูลอีกครั้ง',
-            [
-              {text: 'ยืนยัน', onPress: () => console.log('ยืนยัน')},
-              {text: 'ยกเลิก', onPress: () => console.log('ยกเลิก'), style: 'cancel'},
-            ],
-            { cancelable: false }
+            responseData.message+'\n\nโปรดตรวจสอบข้อมูลอีกครั้ง'
           );
         }
 
