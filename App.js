@@ -56,6 +56,8 @@ export default class App extends Component {
     }
 
     if(isJSON == '1'){
+      qrdata.macAddr = mac_addr;
+
       fetch('https://www.trackmycars.net/bike/Api/V1/register_check/', {
         method: 'POST',
         headers: {
