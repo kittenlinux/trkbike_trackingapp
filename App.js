@@ -77,6 +77,12 @@ export default class App extends Component {
         var bikedata = responseData.data;
 
         if(responseData.code=='SUCCESS'){
+          if(bikedata.mac_status==='0')
+            mac_msg='ยังไม่มีการผูกอุปกรณ์ใด ๆ เข้ากับรถคันนี้\nที่อยู่ MAC Address '+mac_addr+' จะถูกผูกเข้ากับรถจักรยานยนต์คันนี้';
+          else if(bikedata.mac_status==='1')
+            mac_msg='อุปกรณ์นี้คืออุปกรณ์เดิมที่ท่านเคยผูกมาก่อนหน้านี้\nที่อยู่ MAC Address '+mac_addr+' จะถูกผูกเข้ากับรถจักรยานยนต์คันนี้อีกครั้ง';
+          else if(bikedata.mac_status==='2')
+            mac_msg='มีการผูกอุปกรณ์อื่นเข้ากับรถจักรยานยนต์คันนี้อยู่แล้ว !\nที่อยู่ MAC Address '+mac_addr+' จะถูกผูกเข้ากับรถจักรยานยนต์คันนี้แทนที่อุปกรณ์เดิม';
 
           Alert.alert(
             'ตรวจสอบข้อมูล',
@@ -85,6 +91,7 @@ export default class App extends Component {
             '\nหมายเลขทะเบียน : '+bikedata.plate+
             '\n\nยี่ห้อ รุ่น : '+bikedata.model+
             '\nสี : '+bikedata.color+
+            '\n\n'+mac_msg+
             '\n\nยืนยันการผูกอุปกรณ์เข้ากับรถจักรยานยนต์ ?',
             [
               {text: 'ยืนยัน', onPress: () => console.log('ยืนยัน')},
