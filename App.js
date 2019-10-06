@@ -77,9 +77,15 @@ export default class App extends Component {
         var bikedata = responseData.data;
 
         if(responseData.code=='SUCCESS'){
+
           Alert.alert(
             'ตรวจสอบข้อมูล',
-            responseData.message+'\n\nผู้ใช้งาน : '+bikedata.username+'\nหมายเลขทะเบียน : '+bikedata.plate+'\n\nยี่ห้อ รุ่น : '+bikedata.model+'\nสี : '+bikedata.color+'\n\nยืนยันการผูกอุปกรณ์เข้ากับรถจักรยานยนต์ ?',
+            responseData.message+
+            '\n\nผู้ใช้งาน : '+bikedata.username+
+            '\nหมายเลขทะเบียน : '+bikedata.plate+
+            '\n\nยี่ห้อ รุ่น : '+bikedata.model+
+            '\nสี : '+bikedata.color+
+            '\n\nยืนยันการผูกอุปกรณ์เข้ากับรถจักรยานยนต์ ?',
             [
               {text: 'ยืนยัน', onPress: () => console.log('ยืนยัน')},
               {text: 'ยกเลิก', onPress: () => console.log('ยกเลิก'), style: 'cancel'},
@@ -186,8 +192,8 @@ export default class App extends Component {
     }
     return (
       <View style={{ flex: 1 }}>
-        <Text>Test</Text>
- 
+        <Text style={{fontWeight: 'bold', textAlign: 'center'}}>เปิดเว็บไซต์ trackmycars.net/bike ทำการเข้าสู่ระบบ และสแกนคิวอาร์โค้ดของรถจักรยานยนต์ที่ท่านต้องการใช้งาน</Text>
+
         <CameraKitCameraScreen
           showFrame={true}
           scanBarcode={true}
