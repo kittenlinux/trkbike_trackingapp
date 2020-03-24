@@ -94,7 +94,11 @@ export default class App extends Component {
               '\n\n' + mac_msg +
               '\n\nยืนยันการผูกอุปกรณ์เข้ากับรถจักรยานยนต์ ?',
               [
-                { text: 'ยืนยัน', onPress: () => console.log('ยืนยัน') },
+                {
+                  text: 'ยืนยัน', onPress: () => {
+                    console.log('ยืนยัน')
+                  }
+                },
                 { text: 'ยกเลิก', onPress: () => console.log('ยกเลิก'), style: 'cancel' },
               ],
               { cancelable: false }
