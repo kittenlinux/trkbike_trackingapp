@@ -57,6 +57,7 @@ export default class App extends Component {
 
     if (isJSON == '1') {
       qrdata.macAddr = mac_addr;
+      console.log(qrdata)
 
       fetch('https://www.trackmycars.net/bike/Api/V1/register_check/', {
         method: 'POST',
@@ -75,6 +76,7 @@ export default class App extends Component {
           console.log(responseData);
 
           var bikedata = responseData.data;
+          console.log(bikedata);
 
           if (responseData.code == 'SUCCESS') {
             if (bikedata.mac_status === '0')
@@ -96,7 +98,31 @@ export default class App extends Component {
               [
                 {
                   text: 'ยืนยัน', onPress: () => {
-                    console.log('ยืนยัน')
+                    var bikedata_confirm = { bikeId: bikedata.bike_id, macAddr: mac_addr };
+
+                    console.log(bikedata_confirm);
+
+                    fetch('https://www.trackmycars.net/bike/Api/V1/register_confirm/', {
+                      method: 'POST',
+                      headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify(bikedata_confirm),
+                    })
+                      .then((response) => response.json())
+                      .then((responseData) => {
+                        if (responseData.code == 'SUCCESS') {
+                          console.log('ยืนยัน')
+                          console.log(qrdata)
+                        }
+                        else if (responseData.code == 'FAIL') {
+                          Alert.alert(
+                            'ผิดพลาด',
+                            responseData.message + '\n\nโปรดตรวจสอบข้อมูลอีกครั้ง'
+                          );
+                        }
+                      })
                   }
                 },
                 { text: 'ยกเลิก', onPress: () => console.log('ยกเลิก'), style: 'cancel' },
@@ -109,7 +135,6 @@ export default class App extends Component {
               responseData.message + '\n\nโปรดตรวจสอบข้อมูลอีกครั้ง'
             );
           }
-
 
         });
     }
