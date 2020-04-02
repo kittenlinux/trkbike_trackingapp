@@ -80,11 +80,11 @@ export default class App extends Component {
 
           if (responseData.code == 'SUCCESS') {
             if (bikedata.mac_status === '0')
-              mac_msg = 'ยังไม่มีการผูกอุปกรณ์ใด ๆ เข้ากับรถคันนี้\nที่อยู่ MAC Address ' + mac_addr + ' จะถูกผูกเข้ากับรถจักรยานยนต์คันนี้';
+              var mac_msg = 'ยังไม่มีการผูกอุปกรณ์ใด ๆ เข้ากับรถคันนี้\nที่อยู่ MAC Address ' + mac_addr + ' จะถูกผูกเข้ากับรถจักรยานยนต์คันนี้';
             else if (bikedata.mac_status === '1')
-              mac_msg = 'อุปกรณ์นี้คืออุปกรณ์เดิมที่ท่านเคยผูกมาก่อนหน้านี้\nที่อยู่ MAC Address ' + mac_addr + ' จะถูกผูกเข้ากับรถจักรยานยนต์คันนี้อีกครั้ง';
+              var mac_msg = 'อุปกรณ์นี้คืออุปกรณ์เดิมที่ท่านเคยผูกมาก่อนหน้านี้\nที่อยู่ MAC Address ' + mac_addr + ' จะถูกผูกเข้ากับรถจักรยานยนต์คันนี้อีกครั้ง';
             else if (bikedata.mac_status === '2')
-              mac_msg = 'มีการผูกอุปกรณ์อื่นเข้ากับรถจักรยานยนต์คันนี้อยู่แล้ว !\nที่อยู่ MAC Address ' + mac_addr + ' จะถูกผูกเข้ากับรถจักรยานยนต์คันนี้แทนที่อุปกรณ์เดิม';
+              var mac_msg = 'มีการผูกอุปกรณ์อื่นเข้ากับรถจักรยานยนต์คันนี้อยู่แล้ว !\nที่อยู่ MAC Address ' + mac_addr + ' จะถูกผูกเข้ากับรถจักรยานยนต์คันนี้แทนที่อุปกรณ์เดิม';
 
             Alert.alert(
               'ตรวจสอบข้อมูล',
@@ -98,7 +98,7 @@ export default class App extends Component {
               [
                 {
                   text: 'ยืนยัน', onPress: () => {
-                    var bikedata_confirm = { bikeId: bikedata.bike_id, macAddr: mac_addr };
+                    var bikedata_confirm = { user: bikedata.users_user, bikeId: bikedata.bike_id, macAddr: mac_addr };
 
                     console.log(bikedata_confirm);
 
