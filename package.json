@@ -8,7 +8,6 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@react-native-community/async-storage": "^1.10.0",
     "react": "16.11.0",
     "react-native": "0.62.0",
     "react-native-camera-kit": "^8.0.4",
