@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Alert, BackHandler, Linking, PermissionsAndroid, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { CameraKitCameraScreen } from 'react-native-camera-kit';
 import DeviceInfo from 'react-native-device-info';
+import AsyncStorage from '@react-native-community/async-storage';
 
 export default class App extends Component {
   constructor() {
@@ -107,6 +108,7 @@ export default class App extends Component {
                       .then((response) => response.json())
                       .then((responseData) => {
                         if (responseData.code == 'SUCCESS') {
+                          
                           Alert.alert(
                             'สำเร็จ',
                             responseData.message
