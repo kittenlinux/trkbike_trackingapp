@@ -85,13 +85,17 @@ export default class App extends Component {
 
             Alert.alert(
               'ตรวจสอบข้อมูล',
-              responseData.message +
-              '\n\nผู้ใช้งาน : ' + bikedata.username +
-              '\nหมายเลขทะเบียน : ' + bikedata.plate +
-              '\n\nยี่ห้อ รุ่น : ' + bikedata.model +
-              '\nสี : ' + bikedata.color +
-              '\n\n' + mac_msg +
-              '\n\nยืนยันการผูกอุปกรณ์เข้ากับรถจักรยานยนต์ ?',
+              `${responseData.message}
+
+ผู้ใช้งาน : ${bikedata.username}
+หมายเลขทะเบียน : ${bikedata.plate}
+
+ยี่ห้อ รุ่น : ${bikedata.model}
+สี : ${bikedata.color}
+
+${mac_msg}
+
+ยืนยันการผูกอุปกรณ์เข้ากับรถจักรยานยนต์ ?`,
               [
                 {
                   text: 'ยืนยัน', onPress: () => {
@@ -108,7 +112,7 @@ export default class App extends Component {
                       .then((response) => response.json())
                       .then((responseData) => {
                         if (responseData.code == 'SUCCESS') {
-                          
+
                           Alert.alert(
                             'สำเร็จ',
                             responseData.message
