@@ -77,11 +77,14 @@ export default class App extends Component {
 
           if (responseData.code == 'SUCCESS') {
             if (bikedata.mac_status === '0')
-              var mac_msg = 'ยังไม่มีการผูกอุปกรณ์ใด ๆ เข้ากับรถคันนี้\nที่อยู่ MAC Address ' + mac_addr + ' จะถูกผูกเข้ากับรถจักรยานยนต์คันนี้';
+              var mac_msg = `ยังไม่มีการผูกอุปกรณ์ใด ๆ เข้ากับรถคันนี้
+ที่อยู่ MAC Address ${mac_addr} จะถูกผูกเข้ากับรถจักรยานยนต์คันนี้`;
             else if (bikedata.mac_status === '1')
-              var mac_msg = 'อุปกรณ์นี้คืออุปกรณ์เดิมที่ท่านเคยผูกมาก่อนหน้านี้\nที่อยู่ MAC Address ' + mac_addr + ' จะถูกผูกเข้ากับรถจักรยานยนต์คันนี้อีกครั้ง';
+              var mac_msg = `อุปกรณ์นี้คืออุปกรณ์เดิมที่ท่านเคยผูกมาก่อนหน้านี้
+ที่อยู่ MAC Address ${mac_addr} จะถูกผูกเข้ากับรถจักรยานยนต์คันนี้อีกครั้ง`;
             else if (bikedata.mac_status === '2')
-              var mac_msg = 'มีการผูกอุปกรณ์อื่นเข้ากับรถจักรยานยนต์คันนี้อยู่แล้ว !\nที่อยู่ MAC Address ' + mac_addr + ' จะถูกผูกเข้ากับรถจักรยานยนต์คันนี้แทนที่อุปกรณ์เดิม';
+              var mac_msg = `มีการผูกอุปกรณ์อื่นเข้ากับรถจักรยานยนต์คันนี้อยู่แล้ว !
+ที่อยู่ MAC Address ${mac_addr} จะถูกผูกเข้ากับรถจักรยานยนต์คันนี้แทนที่อุปกรณ์เดิม`;
 
             Alert.alert(
               'ตรวจสอบข้อมูล',
@@ -121,7 +124,9 @@ ${mac_msg}
                         else if (responseData.code == 'FAIL') {
                           Alert.alert(
                             'ผิดพลาด',
-                            responseData.message + '\n\nโปรดตรวจสอบข้อมูลอีกครั้ง'
+                            `${responseData.message}
+
+โปรดตรวจสอบข้อมูลอีกครั้ง`
                           );
                         }
                       })
@@ -134,7 +139,9 @@ ${mac_msg}
           } else if (responseData.code == 'FAIL') {
             Alert.alert(
               'ผิดพลาด',
-              responseData.message + '\n\nโปรดตรวจสอบข้อมูลอีกครั้ง'
+              `${responseData.message}
+
+โปรดตรวจสอบข้อมูลอีกครั้ง`
             );
           }
 
@@ -181,7 +188,7 @@ ${mac_msg}
   set_Status_OnOff = () => {
     Alert.alert(
       'ข้อมูล',
-      'หมายเลข MAC Address ของคุณคือ ' + mac_addr,
+      `หมายเลข MAC Address ของคุณคือ ${mac_addr}`,
     );
   }
 
@@ -198,7 +205,7 @@ ${mac_msg}
           <Text style={{ fontSize: 22, textAlign: 'center' }}>ยินดีต้อนรับสู่ ลูกข่ายติดตามรถจักรยานยนต์ Track My Bikes</Text>
 
           <Text style={styles.QR_text}>
-            {this.state.QR_Code_Value ? 'Scanned QR Code: ' + this.state.QR_Code_Value : ''}
+            {this.state.QR_Code_Value ? `Scanned QR Code: ${this.state.QR_Code_Value}` : ''}
           </Text>
 
           {this.state.QR_Code_Value.includes("http") ?
