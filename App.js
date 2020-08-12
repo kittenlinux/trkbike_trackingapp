@@ -3,6 +3,7 @@ import { Alert, BackHandler, Linking, PermissionsAndroid, Platform, StyleSheet, 
 import { CameraKitCameraScreen } from 'react-native-camera-kit';
 import DeviceInfo from 'react-native-device-info';
 import AsyncStorage from '@react-native-community/async-storage';
+import Geolocation from 'react-native-geolocation-service';
 
 export default class App extends Component {
   constructor() {
