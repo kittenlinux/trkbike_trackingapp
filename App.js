@@ -115,7 +115,7 @@ ${mac_msg}
                       .then((response) => response.json())
                       .then((responseData) => {
                         if (responseData.code == 'SUCCESS') {
-
+                          this.saveBikeKeytoAsync(bikedata.users_user, bikedata.bike_id, mac_addr)
                           Alert.alert(
                             'สำเร็จ',
                             responseData.message
@@ -185,10 +185,25 @@ ${mac_msg}
     }
   }
 
-  set_Status_OnOff = () => {
+  saveBikeKeytoAsync = async (user, bikeId, mac_addr) => {
+    try {
+      await AsyncStorage.setItem('user_id', user)
+      await AsyncStorage.setItem('bike_key', bikeId)
+      await AsyncStorage.setItem('mac_address', mac_addr)
+    } catch (e) {
+      // save error
+    }
+  }
+
+  set_Status_OnOff = async () => {
+    let bike_key = await AsyncStorage.getItem('bike_key')
+    let user_id = await AsyncStorage.getItem('user_id')
+    let mac_address = await AsyncStorage.getItem('mac_address')
     Alert.alert(
       'ข้อมูล',
-      `หมายเลข MAC Address ของคุณคือ ${mac_addr}`,
+      `คีย์รถจักรยานยนต์คือ ${bike_key}
+ที่อยู่แมคแอดเดรสคือ ${mac_address}
+ไอดีของคุณคือ ${user_id}`,
     );
   }
 
@@ -204,9 +219,9 @@ ${mac_msg}
 
           <Text style={{ fontSize: 22, textAlign: 'center' }}>ยินดีต้อนรับสู่ ลูกข่ายติดตามรถจักรยานยนต์ Track My Bikes</Text>
 
-          <Text style={styles.QR_text}>
+          {/* <Text style={styles.QR_text}>
             {this.state.QR_Code_Value ? `Scanned QR Code: ${this.state.QR_Code_Value}` : ''}
-          </Text>
+          </Text> */}
 
           {this.state.QR_Code_Value.includes("http") ?
             <TouchableOpacity
@@ -221,6 +236,15 @@ ${mac_msg}
             style={styles.button}>
             <Text style={{ color: '#FFF', fontSize: 14 }}>
               สแกนคิวอาร์โค้ด
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            disabled={true}
+            onPress={this.set_Status_OnOff}
+            style={styles.button}>
+            <Text style={{ color: '#FFF', fontSize: 14 }}>
+              ปรับค่าไจโรสโคป
             </Text>
           </TouchableOpacity>
 
