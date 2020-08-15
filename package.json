@@ -26,6 +26,9 @@
     "metro-react-native-babel-preset": "0.58.0",
     "react-test-renderer": "16.8.6"
   },
+  "resolutions": {
+    "@react-native-community/cli-debugger-ui": "4.7.0"
+ },
   "jest": {
     "preset": "react-native"
   }
