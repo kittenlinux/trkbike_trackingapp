@@ -240,19 +240,19 @@ ${mac_msg}
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             disabled={true}
             onPress={this.set_Status_OnOff}
             style={styles.button}>
             <Text style={{ color: '#FFF', fontSize: 14 }}>
               ปรับค่าไจโรสโคป
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           <TouchableOpacity
             onPress={this.set_Status_OnOff}
             style={styles.button}>
-            <Text style={{ color: '#FFF', fontSize: 14 }}>
+            <Text style={{ color: '#FFF', fontSize: 24 }}>
               เปิดการติดตาม
             </Text>
           </TouchableOpacity>
