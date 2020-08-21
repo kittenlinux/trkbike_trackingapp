@@ -192,7 +192,7 @@ ${mac_msg}
       await AsyncStorage.setItem('bike_key', bikeId)
       await AsyncStorage.setItem('mac_address', mac_addr)
     } catch (e) {
-      // save error
+      Alert.alert("ผิดพลาด", "พบปัญหาในการเก็บข้อมูลรถจักรยานยนต์ โปรดติดต่อผู้ดูแลระบบ");
     }
   }
 
