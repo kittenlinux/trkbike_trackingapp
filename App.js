@@ -5,6 +5,8 @@ import DeviceInfo from 'react-native-device-info';
 import AsyncStorage from '@react-native-community/async-storage';
 import Geolocation from 'react-native-geolocation-service';
 
+let base_url = 'https://www.trackmycars.net/bike/Api/V1/';
+
 export default class App extends Component {
   constructor() {
     super();
@@ -60,7 +62,7 @@ export default class App extends Component {
     if (isJSON == '1') {
       qrdata.macAddr = mac_addr;
 
-      fetch('https://www.trackmycars.net/bike/Api/V1/register_check/', {
+      fetch(base_url + 'register_check', {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -105,7 +107,7 @@ ${mac_msg}
                   text: 'ยืนยัน', onPress: () => {
                     var bikedata_confirm = { user: bikedata.users_user, bikeId: bikedata.bike_id, macAddr: mac_addr };
 
-                    fetch('https://www.trackmycars.net/bike/Api/V1/register_confirm/', {
+                    fetch(base_url + 'register_confirm', {
                       method: 'POST',
                       headers: {
                         Accept: 'application/json',
