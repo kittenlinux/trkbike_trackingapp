@@ -4,6 +4,7 @@ import { CameraKitCameraScreen } from 'react-native-camera-kit';
 import DeviceInfo from 'react-native-device-info';
 import AsyncStorage from '@react-native-community/async-storage';
 import Geolocation from 'react-native-geolocation-service';
+import VIForegroundService from '@voximplant/react-native-foreground-service';
 
 let base_url = 'https://www.trackmycars.net/bike/Api/V1/';
 

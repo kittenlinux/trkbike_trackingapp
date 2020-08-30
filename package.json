@@ -10,6 +10,7 @@
   "dependencies": {
     "@react-native-community/async-storage": "^1.11.0",
     "@react-native-community/cli": "^4.12.0",
+    "@voximplant/react-native-foreground-service": "^2.0.0",
     "react": "16.13.1",
     "react-native": "0.63.2",
     "react-native-camera-kit": "^8.0.4",
@@ -28,7 +29,7 @@
   },
   "resolutions": {
     "@react-native-community/cli-debugger-ui": "4.7.0"
- },
+  },
   "jest": {
     "preset": "react-native"
   }

@@ -1255,6 +1255,11 @@
   dependencies:
     "@types/yargs-parser" "*"
 
+"@voximplant/react-native-foreground-service@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@voximplant/react-native-foreground-service/-/react-native-foreground-service-2.0.0.tgz#06da5b121231a8ffcb13bc792ce67c37f1fbb2d8"
+  integrity sha512-V7hpxvYVsIvbpJaIlhjl4BUsWEzPYKIIfWZOYm0s93VEBmp548xx8f5hSeVuhaR6NqveibxVNr+J011ej/yc2g==
+
 abab@^2.0.0:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/abab/-/abab-2.0.4.tgz#6dfa57b417ca06d21b2478f0e638302f99c2405c"
