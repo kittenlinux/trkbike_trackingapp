@@ -20,8 +20,7 @@
       </intent-filter>
     </activity>
     <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
+    <service android:name="com.voximplant.foregroundservice.VIForegroundService"> </service>
   </application>
-
-  <service android:name="com.voximplant.foregroundservice.VIForegroundService"> </service>
 
 </manifest>
