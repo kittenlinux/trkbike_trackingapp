@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { Alert, BackHandler, Linking, PermissionsAndroid, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, BackHandler, Linking, PermissionsAndroid, Platform, StyleSheet, Text, TouchableOpacity, View, Button } from 'react-native';
 import { CameraKitCameraScreen } from 'react-native-camera-kit';
 import DeviceInfo from 'react-native-device-info';
 import AsyncStorage from '@react-native-community/async-storage';
 import Geolocation from 'react-native-geolocation-service';
 import VIForegroundService from '@voximplant/react-native-foreground-service';
+import appConfig from './app.json';
 
 let base_url = 'https://www.trackmycars.net/bike/Api/V1/';
 
@@ -16,7 +17,15 @@ export default class App extends Component {
       QR_Code_Value: '',
       Start_Scanner: false,
       loading: false,
-      mac_addr: ''
+      mac_addr: '',
+      forceLocation: true,
+      highAccuracy: true,
+      loading: false,
+      showLocationDialog: true,
+      significantChanges: false,
+      updatesEnabled: false,
+      foregroundService: true,
+      location: {},
     };
   }
 
@@ -28,6 +37,139 @@ export default class App extends Component {
   componentWillUnmount() {
     this.backHandler.remove();
   }
+
+  hasLocationPermission = async () => {
+    if (Platform.OS === 'android' && Platform.Version < 23) {
+      return true;
+    }
+
+    const hasPermission = await PermissionsAndroid.check(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+    );
+
+    if (hasPermission) {
+      return true;
+    }
+
+    const status = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+    );
+
+    if (status === PermissionsAndroid.RESULTS.GRANTED) {
+      return true;
+    }
+
+    if (status === PermissionsAndroid.RESULTS.DENIED) {
+      ToastAndroid.show(
+        'Location permission denied by user.',
+        ToastAndroid.LONG,
+      );
+    } else if (status === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+      ToastAndroid.show(
+        'Location permission revoked by user.',
+        ToastAndroid.LONG,
+      );
+    }
+
+    return false;
+  };
+
+  getLocation = async () => {
+    const hasLocationPermission = await this.hasLocationPermission();
+
+    if (!hasLocationPermission) {
+      return;
+    }
+
+    this.setState({ loading: true }, () => {
+      Geolocation.getCurrentPosition(
+        (position) => {
+          this.setState({ location: position, loading: false });
+          console.log(position);
+        },
+        (error) => {
+          this.setState({ location: error, loading: false });
+          console.log(error);
+        },
+        {
+          enableHighAccuracy: this.state.highAccuracy,
+          timeout: 15000,
+          maximumAge: 10000,
+          distanceFilter: 0,
+          forceRequestLocation: this.state.forceLocation,
+          showLocationDialog: this.state.showLocationDialog,
+        },
+      );
+    });
+  };
+
+  getLocationUpdates = async () => {
+    const hasLocationPermission = await this.hasLocationPermission();
+
+    if (!hasLocationPermission) {
+      return;
+    }
+
+    if (Platform.OS === 'android' && this.state.foregroundService) {
+      await this.startForegroundService();
+    }
+
+    this.setState({ updatesEnabled: true }, () => {
+      this.watchId = Geolocation.watchPosition(
+        (position) => {
+          this.setState({ location: position });
+          console.log(position);
+        },
+        (error) => {
+          this.setState({ location: error });
+          console.log(error);
+        },
+        {
+          enableHighAccuracy: this.state.highAccuracy,
+          distanceFilter: 0,
+          interval: 15000,
+          fastestInterval: 5000,
+          forceRequestLocation: this.state.forceLocation,
+          showLocationDialog: this.state.showLocationDialog,
+          useSignificantChanges: this.state.significantChanges,
+        },
+      );
+    });
+  };
+
+  removeLocationUpdates = () => {
+    if (this.watchId !== null) {
+      this.stopForegroundService();
+      Geolocation.clearWatch(this.watchId);
+      this.watchId = null;
+      this.setState({ updatesEnabled: false });
+    }
+  };
+
+  startForegroundService = async () => {
+    if (Platform.Version >= 26) {
+      await VIForegroundService.createNotificationChannel({
+        id: 'locationChannel',
+        name: 'Location Tracking Channel',
+        description: 'Tracks location of user',
+        enableVibration: false,
+      });
+    }
+
+    return VIForegroundService.startService({
+      channelId: 'locationChannel',
+      id: 420,
+      title: appConfig.displayName,
+      text: 'Tracking location updates',
+      icon: 'ic_launcher',
+    });
+  };
+
+  stopForegroundService = () => {
+    if (this.state.foregroundService) {
+      VIForegroundService.stopService().catch((err) => err);
+    }
+  };
 
   handleBackPress = () => {
     if (!this.state.Start_Scanner) {
@@ -55,7 +197,7 @@ export default class App extends Component {
     try {
       qrdata = JSON.parse(QR_Code);
     }
-    catch{
+    catch {
       Alert.alert('ผิดพลาด', 'รูปแบบคิวอาร์โค้ดไม่ถูกต้อง โปรดตรวจสอบข้อมูลอีกครั้ง');
       isJSON = '0';
     }
@@ -259,6 +401,10 @@ ${mac_msg}
               เปิดการติดตาม
             </Text>
           </TouchableOpacity>
+
+          <Button title="Start foreground service" onPress={() => this.getLocationUpdates()} />
+          <View style={styles.space} />
+          <Button title="Stop foreground service" onPress={() => this.removeLocationUpdates()} />
 
         </View>
       );
