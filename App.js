@@ -25,7 +25,8 @@ export default class App extends Component {
       significantChanges: false,
       updatesEnabled: false,
       foregroundService: true,
-      location: {},
+      location: [],
+      location_onetime: [],
     };
   }
 
@@ -84,17 +85,17 @@ export default class App extends Component {
     this.setState({ loading: true }, () => {
       Geolocation.getCurrentPosition(
         (position) => {
-          this.setState({ location: position, loading: false });
+          this.setState({ location_onetime: position, loading: false });
           console.log(position);
         },
         (error) => {
-          this.setState({ location: error, loading: false });
+          this.setState({ location_onetime: error, loading: false });
           console.log(error);
         },
         {
           enableHighAccuracy: this.state.highAccuracy,
-          timeout: 15000,
-          maximumAge: 10000,
+          timeout: 10000,
+          maximumAge: 5000,
           distanceFilter: 0,
           forceRequestLocation: this.state.forceLocation,
           showLocationDialog: this.state.showLocationDialog,
@@ -110,15 +111,75 @@ export default class App extends Component {
       return;
     }
 
+    await this.getLocation().then(trkdata_start = {
+      bikeId: await AsyncStorage.getItem('bike_key'),
+      user: await AsyncStorage.getItem('user_id'), macAddr:
+        await AsyncStorage.getItem('mac_address'),
+      lat: this.state.location_onetime.coords.latitude,
+      lng: this.state.location_onetime.coords.longitude,
+      event: '301'
+    }).then(fetch(base_url + 'track', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(trkdata_start),
+    })
+      .then((response) => response.json())
+      .then((responseData) => {
+        if (responseData.code == 'SUCCESS') {
+          Alert.alert(
+            'สำเร็จ',
+            responseData.message
+          );
+        }
+        else if (responseData.code == 'FAIL') {
+          Alert.alert(
+            'ผิดพลาด',
+            `${responseData.message}
+
+โปรดตรวจสอบข้อมูลอีกครั้ง`
+          );
+        }
+      }))
+
     if (Platform.OS === 'android' && this.state.foregroundService) {
       await this.startForegroundService();
     }
+
+    let bike_key = await AsyncStorage.getItem('bike_key');
+    let user_id = await AsyncStorage.getItem('user_id');
+    let mac_address = await AsyncStorage.getItem('mac_address');
 
     this.setState({ updatesEnabled: true }, () => {
       this.watchId = Geolocation.watchPosition(
         (position) => {
           this.setState({ location: position });
           console.log(position);
+          trkdata_start = {
+            bikeId: bike_key,
+            user: user_id, macAddr:
+              mac_address,
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            event: '1'
+          }
+          fetch(base_url + 'track', {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(trkdata_start),
+          })
+            .then((response) => response.json())
+            .then((responseData) => {
+              if (responseData.code == 'SUCCESS') {
+              }
+              else if (responseData.code == 'FAIL') {
+              }
+            })
         },
         (error) => {
           this.setState({ location: error });
@@ -137,7 +198,7 @@ export default class App extends Component {
     });
   };
 
-  removeLocationUpdates = () => {
+  removeLocationUpdates = async () => {
     if (this.watchId !== null) {
       this.stopForegroundService();
       Geolocation.clearWatch(this.watchId);
@@ -165,10 +226,47 @@ export default class App extends Component {
     });
   };
 
-  stopForegroundService = () => {
+  stopForegroundService = async () => {
     if (this.state.foregroundService) {
       VIForegroundService.stopService().catch((err) => err);
     }
+
+    this.getLocation().then(console.log(this.state.location_onetime));
+
+    var trkdata_stop = {
+      bikeId: await AsyncStorage.getItem('bike_key'),
+      user: await AsyncStorage.getItem('user_id'), macAddr:
+        await AsyncStorage.getItem('mac_address'),
+      lat: this.state.location_onetime.coords.latitude,
+      lng: this.state.location_onetime.coords.longitude,
+      event: '302'
+    };
+
+    fetch(base_url + 'track', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(trkdata_stop),
+    })
+      .then((response) => response.json())
+      .then((responseData) => {
+        if (responseData.code == 'SUCCESS') {
+          Alert.alert(
+            'สำเร็จ',
+            responseData.message
+          );
+        }
+        else if (responseData.code == 'FAIL') {
+          Alert.alert(
+            'ผิดพลาด',
+            `${responseData.message}
+
+โปรดตรวจสอบข้อมูลอีกครั้ง`
+          );
+        }
+      })
   };
 
   handleBackPress = () => {
@@ -185,10 +283,6 @@ export default class App extends Component {
     else
       this.setState({ Start_Scanner: false });
     return true;
-  }
-
-  openLink_in_browser = () => {
-    Linking.openURL(this.state.QR_Code_Value);
   }
 
   onQR_Code_Scan_Done = (QR_Code) => {
@@ -248,7 +342,11 @@ ${mac_msg}
               [
                 {
                   text: 'ยืนยัน', onPress: () => {
-                    var bikedata_confirm = { user: bikedata.users_user, bikeId: bikedata.bike_id, macAddr: mac_addr };
+                    var bikedata_confirm = {
+                      user: bikedata.users_user,
+                      bikeId: bikedata.bike_id,
+                      macAddr: mac_addr
+                    };
 
                     fetch(base_url + 'register_confirm', {
                       method: 'POST',
