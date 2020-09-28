@@ -358,6 +358,17 @@ ${mac_msg}
   }
 
   render() {
+    const {
+      forceLocation,
+      highAccuracy,
+      loading,
+      location,
+      showLocationDialog,
+      significantChanges,
+      updatesEnabled,
+      foregroundService,
+    } = this.state;
+
     if (!this.state.Start_Scanner) {
 
       return (
@@ -368,14 +379,6 @@ ${mac_msg}
           {/* <Text style={styles.QR_text}>
             {this.state.QR_Code_Value ? `Scanned QR Code: ${this.state.QR_Code_Value}` : ''}
           </Text> */}
-
-          {this.state.QR_Code_Value.includes("http") ?
-            <TouchableOpacity
-              onPress={this.openLink_in_browser}
-              style={styles.button}>
-              <Text style={{ color: '#FFF', fontSize: 14 }}>Open Link in default Browser</Text>
-            </TouchableOpacity> : null
-          }
 
           <TouchableOpacity
             onPress={this.open_QR_Code_Scanner}
@@ -393,19 +396,21 @@ ${mac_msg}
               ปรับค่าไจโรสโคป
             </Text>
           </TouchableOpacity> */}
-
-          <TouchableOpacity
-            onPress={this.set_Status_OnOff}
-            style={styles.button}>
-            <Text style={{ color: '#FFF', fontSize: 24 }}>
-              เปิดการติดตาม
+          {!updatesEnabled ?
+            <TouchableOpacity
+              onPress={() => this.getLocationUpdates()} disabled={updatesEnabled}
+              style={styles.button}>
+              <Text style={{ color: '#FFF', fontSize: 24 }}>
+                เปิดการติดตาม
             </Text>
-          </TouchableOpacity>
-
-          <Button title="Start foreground service" onPress={() => this.getLocationUpdates()} />
-          <View style={styles.space} />
-          <Button title="Stop foreground service" onPress={() => this.removeLocationUpdates()} />
-
+            </TouchableOpacity> :
+            <TouchableOpacity
+              onPress={() => this.removeLocationUpdates()} disabled={!updatesEnabled}
+              style={styles.button_red}>
+              <Text style={{ color: '#FFF', fontSize: 24 }}>
+                ปิดการติดตาม
+          </Text>
+            </TouchableOpacity>}
         </View>
       );
     }
@@ -446,6 +451,13 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: '#2979FF',
+    alignItems: 'center',
+    padding: 12,
+    width: 300,
+    marginTop: 14
+  },
+  button_red: {
+    backgroundColor: 'red',
     alignItems: 'center',
     padding: 12,
     width: 300,
