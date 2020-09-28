@@ -376,10 +376,6 @@ ${mac_msg}
 
           <Text style={{ fontSize: 22, textAlign: 'center' }}>ยินดีต้อนรับสู่ ลูกข่ายติดตามรถจักรยานยนต์ Track My Bikes</Text>
 
-          {/* <Text style={styles.QR_text}>
-            {this.state.QR_Code_Value ? `Scanned QR Code: ${this.state.QR_Code_Value}` : ''}
-          </Text> */}
-
           <TouchableOpacity
             onPress={this.open_QR_Code_Scanner}
             style={styles.button}>
