@@ -410,6 +410,7 @@ ${mac_msg}
                             'สำเร็จ',
                             responseData.message
                           );
+                          this.getDeviceInfo()
                         }
                         else if (responseData.code == 'FAIL') {
                           Alert.alert(
@@ -440,7 +441,6 @@ ${mac_msg}
 
     this.setState({ QR_Code_Value: QR_Code });
     this.setState({ Start_Scanner: false });
-    this.getDeviceInfo();
   }
 
   open_QR_Code_Scanner = () => {
