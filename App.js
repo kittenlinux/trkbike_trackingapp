@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
-import { Alert, BackHandler, Linking, PermissionsAndroid, Platform, StyleSheet, Text, TouchableOpacity, View, Button } from 'react-native';
+import { Alert, BackHandler, PermissionsAndroid, Platform, StyleSheet, Text, TouchableOpacity, View, Button } from 'react-native';
 import { CameraKitCameraScreen } from 'react-native-camera-kit';
 import DeviceInfo from 'react-native-device-info';
 import AsyncStorage from '@react-native-community/async-storage';
 import Geolocation from 'react-native-geolocation-service';
 import VIForegroundService from '@voximplant/react-native-foreground-service';
 import {
-  accelerometer,
   gyroscope,
   setUpdateIntervalForType,
   SensorTypes
@@ -18,6 +17,7 @@ import appConfig from './app.json';
 
 let base_url = 'https://www.trackmycars.net/bike/Api/V1/';
 let subscription;
+let calibrate;
 
 export default class App extends Component {
   constructor() {
@@ -58,8 +58,26 @@ export default class App extends Component {
 
     this.getDeviceInfo();
 
-    subscription = gyroscope.subscribe(({ x, y, z, timestamp }) =>
-      console.log({ x, y, z, timestamp })
+    subscription = gyroscope.subscribe(({ x, y, z, timestamp }) => {
+      // console.log({ x, y, z, timestamp })
+      if (x <= this.state.x_low)
+        this.setState({ x_low: x })
+      else if (x >= this.state.x_high)
+        this.setState({ x_high: x })
+      if (y <= this.state.y_low)
+        this.setState({ y_low: y })
+      else if (y >= this.state.y_high)
+        this.setState({ y_high: y })
+      if (z <= this.state.z_low)
+        this.setState({ z_low: z })
+      else if (z >= this.state.z_high)
+        this.setState({ z_high: z })
+      this.setState({
+        x: x,
+        y: y,
+        z: z
+      })
+    }
     );
   }
 
@@ -584,6 +602,9 @@ ${mac_msg}
           </Text>
             </TouchableOpacity>}
           <Text style={{ fontSize: 18, textAlign: 'center' }}>{deviceInfo}</Text>
+          <Text style={{ fontSize: 12 }}>X: {this.state.x}{"\n"}Y: {this.state.y}{"\n"}Z: {this.state.z}</Text>
+          <Text style={{ fontSize: 12 }}>X low: {this.state.x_low}{"\n"}Y low: {this.state.y_low}{"\n"}Z low: {this.state.z_low}</Text>
+          <Text style={{ fontSize: 12 }}>X high: {this.state.x_high}{"\n"}Y high: {this.state.y_high}{"\n"}Z high: {this.state.z_high}</Text>
         </View>
       );
     }
