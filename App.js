@@ -23,7 +23,7 @@ export default class App extends Component {
   constructor() {
     super();
 
-    setUpdateIntervalForType(SensorTypes.gyroscope, 100); // defaults to 100ms
+    setUpdateIntervalForType(SensorTypes.gyroscope, 2000); // defaults to 100ms
 
     this.state = {
       QR_Code_Value: '',
@@ -37,6 +37,7 @@ export default class App extends Component {
       significantChanges: false,
       updatesEnabled: false,
       foregroundService: true,
+      deviceInfo: '',
       location: [],
       location_onetime: [],
       x: 0,
@@ -54,6 +55,8 @@ export default class App extends Component {
   componentDidMount() {
     DeviceInfo.getMacAddress().then(mac => { mac_addr = JSON.stringify(mac).slice(1, JSON.stringify(mac).length - 1); });
     this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
+
+    this.getDeviceInfo();
 
     subscription = gyroscope.subscribe(({ x, y, z, timestamp }) =>
       console.log({ x, y, z, timestamp })
@@ -258,8 +261,8 @@ export default class App extends Component {
       bikeId: await AsyncStorage.getItem('bike_key'),
       user: await AsyncStorage.getItem('user_id'), macAddr:
         await AsyncStorage.getItem('mac_address'),
-      lat: this.state.location_onetime.coords.latitude,
-      lng: this.state.location_onetime.coords.longitude,
+      lat: this.state.location.coords.latitude,
+      lng: this.state.location.coords.longitude,
       event: '302'
     };
 
@@ -400,9 +403,9 @@ ${mac_msg}
                       .then((response) => response.json())
                       .then((responseData) => {
                         DialogProgress.hide()
-                        
+
                         if (responseData.code == 'SUCCESS') {
-                          this.saveBikeKeytoAsync(bikedata.users_user, bikedata.bike_id, mac_addr)
+                          this.saveBikeDatatoAsync(bikedata.users_user, bikedata.bike_id, mac_addr, bikedata.username, bikedata.plate, bikedata.model, bikedata.color)
                           Alert.alert(
                             'สำเร็จ',
                             responseData.message
@@ -437,6 +440,7 @@ ${mac_msg}
 
     this.setState({ QR_Code_Value: QR_Code });
     this.setState({ Start_Scanner: false });
+    this.getDeviceInfo();
   }
 
   open_QR_Code_Scanner = () => {
@@ -472,13 +476,38 @@ ${mac_msg}
     }
   }
 
-  saveBikeKeytoAsync = async (user, bikeId, mac_addr) => {
+  saveBikeDatatoAsync = async (user, bikeId, mac_addr, username, plate, model, color) => {
     try {
       await AsyncStorage.setItem('user_id', user)
       await AsyncStorage.setItem('bike_key', bikeId)
       await AsyncStorage.setItem('mac_address', mac_addr)
+      await AsyncStorage.setItem('username', username)
+      await AsyncStorage.setItem('plate', plate)
+      await AsyncStorage.setItem('model', model)
+      await AsyncStorage.setItem('color', color)
     } catch (e) {
       Alert.alert("ผิดพลาด", "พบปัญหาในการเก็บข้อมูลรถจักรยานยนต์ โปรดติดต่อผู้ดูแลระบบ");
+    }
+  }
+
+  getDeviceInfo = async () => {
+    if (await AsyncStorage.getItem('bike_key')) {
+      let username = await AsyncStorage.getItem('username');
+      let plate = await AsyncStorage.getItem('plate');
+      let model = await AsyncStorage.getItem('model');
+      let color = await AsyncStorage.getItem('color');
+
+      var data = `
+ชื่อผู้ใช้ : ${username}
+หมายเลขทะเบียน : ${plate}
+รุ่น : ${model}
+สี : ${color}`
+      this.setState({ deviceInfo: data })
+    }
+    else {
+      var data = `
+ยังไม่มีการลงทะเบียนอุปกรณ์`
+      this.setState({ deviceInfo: data })
     }
   }
 
@@ -496,6 +525,7 @@ ${mac_msg}
       significantChanges,
       updatesEnabled,
       foregroundService,
+      deviceInfo
     } = this.state;
 
     if (!this.state.Start_Scanner) {
@@ -513,14 +543,6 @@ ${mac_msg}
             </Text>
           </TouchableOpacity>
 
-          {/* <TouchableOpacity
-            disabled={true}
-            onPress={this.set_Status_OnOff}
-            style={styles.button}>
-            <Text style={{ color: '#FFF', fontSize: 14 }}>
-              ปรับค่าไจโรสโคป
-            </Text>
-          </TouchableOpacity> */}
           {!updatesEnabled ?
             <TouchableOpacity
               onPress={async () => {
@@ -537,6 +559,7 @@ ${mac_msg}
                       { text: 'ยกเลิก', onPress: () => console.log('ยกเลิก'), style: 'cancel' },
                       {
                         text: 'ยืนยัน', onPress: () => {
+
                           this.getLocationUpdates()
                         }
                       },
@@ -560,6 +583,7 @@ ${mac_msg}
                 ปิดการติดตาม
           </Text>
             </TouchableOpacity>}
+          <Text style={{ fontSize: 22, textAlign: 'center' }}>{deviceInfo}</Text>
         </View>
       );
     }
