@@ -5,13 +5,22 @@ import DeviceInfo from 'react-native-device-info';
 import AsyncStorage from '@react-native-community/async-storage';
 import Geolocation from 'react-native-geolocation-service';
 import VIForegroundService from '@voximplant/react-native-foreground-service';
+import {
+  accelerometer,
+  gyroscope,
+  setUpdateIntervalForType,
+  SensorTypes
+} from "react-native-sensors";
 import appConfig from './app.json';
 
 let base_url = 'https://www.trackmycars.net/bike/Api/V1/';
+let subscription;
 
 export default class App extends Component {
   constructor() {
     super();
+
+    setUpdateIntervalForType(SensorTypes.gyroscope, 100); // defaults to 100ms
 
     this.state = {
       QR_Code_Value: '',
@@ -27,16 +36,30 @@ export default class App extends Component {
       foregroundService: true,
       location: [],
       location_onetime: [],
+      x: 0,
+      y: 0,
+      z: 0,
+      x_low: 0,
+      y_low: 0,
+      z_low: 0,
+      x_high: 0,
+      y_high: 0,
+      z_high: 0
     };
   }
 
   componentDidMount() {
     DeviceInfo.getMacAddress().then(mac => { mac_addr = JSON.stringify(mac).slice(1, JSON.stringify(mac).length - 1); });
     this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
+
+    subscription = gyroscope.subscribe(({ x, y, z, timestamp }) =>
+      console.log({ x, y, z, timestamp })
+    );
   }
 
   componentWillUnmount() {
     this.backHandler.remove();
+    subscription.unsubscribe();
   }
 
   hasLocationPermission = async () => {
@@ -76,17 +99,12 @@ export default class App extends Component {
   };
 
   getLocation = async () => {
-    const hasLocationPermission = await this.hasLocationPermission();
-
-    if (!hasLocationPermission) {
-      return;
-    }
-
     this.setState({ loading: true }, () => {
       Geolocation.getCurrentPosition(
         (position) => {
           this.setState({ location_onetime: position, loading: false });
           console.log(position);
+          return position;
         },
         (error) => {
           this.setState({ location_onetime: error, loading: false });
@@ -99,7 +117,7 @@ export default class App extends Component {
           distanceFilter: 0,
           forceRequestLocation: this.state.forceLocation,
           showLocationDialog: this.state.showLocationDialog,
-        },
+        }
       );
     });
   };
@@ -111,7 +129,7 @@ export default class App extends Component {
       return;
     }
 
-    await this.getLocation().then(trkdata_start = {
+    this.getLocation().then(trkdata_start = {
       bikeId: await AsyncStorage.getItem('bike_key'),
       user: await AsyncStorage.getItem('user_id'), macAddr:
         await AsyncStorage.getItem('mac_address'),
@@ -187,9 +205,9 @@ export default class App extends Component {
         },
         {
           enableHighAccuracy: this.state.highAccuracy,
-          distanceFilter: 0,
-          interval: 15000,
-          fastestInterval: 5000,
+          distanceFilter: 50,
+          interval: 30000,
+          fastestInterval: 15000,
           forceRequestLocation: this.state.forceLocation,
           showLocationDialog: this.state.showLocationDialog,
           useSignificantChanges: this.state.significantChanges,
@@ -276,7 +294,11 @@ export default class App extends Component {
         'คุณต้องการออกไปยังหน้าหลักหรือไม่ ?',
         [
           { text: 'ไม่ใช่', onPress: () => console.log('ยกเลิก'), style: 'cancel' },
-          { text: 'ใช่', onPress: () => BackHandler.exitApp() },
+          {
+            text: 'ใช่', onPress: () => {
+              BackHandler.exitApp()
+            }
+          },
         ],
         { cancelable: true });
     }
@@ -439,18 +461,6 @@ ${mac_msg}
     }
   }
 
-  set_Status_OnOff = async () => {
-    let bike_key = await AsyncStorage.getItem('bike_key')
-    let user_id = await AsyncStorage.getItem('user_id')
-    let mac_address = await AsyncStorage.getItem('mac_address')
-    Alert.alert(
-      'ข้อมูล',
-      `คีย์รถจักรยานยนต์คือ ${bike_key}
-ที่อยู่แมคแอดเดรสคือ ${mac_address}
-ไอดีของคุณคือ ${user_id}`,
-    );
-  }
-
   onBottomButtonPressed = () => {
     this.setState({ Start_Scanner: false });
   }
@@ -492,7 +502,26 @@ ${mac_msg}
           </TouchableOpacity> */}
           {!updatesEnabled ?
             <TouchableOpacity
-              onPress={() => this.getLocationUpdates()} disabled={updatesEnabled}
+              onPress={async () => {
+                if (await AsyncStorage.getItem('bike_key') && await AsyncStorage.getItem('user_id') && await AsyncStorage.getItem('mac_address')) {
+                  Alert.alert(
+                    'เตรียมการเปิดการติดตาม',
+                    'โปรดวางโทรศัพท์ไว้ในรถจักรยานยนต์ เมื่อท่านวางโทรศัพท์เรียบร้อยแล้ว กรุณากดปุ่มยืนยัน',
+                    [
+                      { text: 'ยกเลิก', onPress: () => console.log('ยกเลิก'), style: 'cancel' },
+                      {
+                        text: 'ยืนยัน', onPress: () => {
+                          this.getLocationUpdates()
+                        }
+                      },
+                    ],
+                    { cancelable: true })
+                }
+                else {
+                  Alert.alert("ผิดพลาด", "ยังไม่ได้ลงทะเบียนอุปกรณ์กับรถจักรยานยนต์ โปรดทำตามขั้นตอนที่ปุ่ม \"สแกนคิวอาร์โค้ด\"");
+                }
+              }
+              } disabled={updatesEnabled}
               style={styles.button}>
               <Text style={{ color: '#FFF', fontSize: 24 }}>
                 เปิดการติดตาม
