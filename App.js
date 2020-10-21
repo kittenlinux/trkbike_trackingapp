@@ -583,7 +583,7 @@ ${mac_msg}
                 ปิดการติดตาม
           </Text>
             </TouchableOpacity>}
-          <Text style={{ fontSize: 22, textAlign: 'center' }}>{deviceInfo}</Text>
+          <Text style={{ fontSize: 18, textAlign: 'center' }}>{deviceInfo}</Text>
         </View>
       );
     }
