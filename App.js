@@ -11,6 +11,9 @@ import {
   setUpdateIntervalForType,
   SensorTypes
 } from "react-native-sensors";
+import { interval } from 'rxjs';
+import { take } from 'rxjs/operators';
+import DialogProgress from 'react-native-dialog-progress'
 import appConfig from './app.json';
 
 let base_url = 'https://www.trackmycars.net/bike/Api/V1/';
@@ -321,6 +324,13 @@ export default class App extends Component {
     if (isJSON == '1') {
       qrdata.macAddr = mac_addr;
 
+      const options = {
+        title: "กำลังประมวลผลข้อมูล",
+        message: "โปรดรอสักครู่...",
+        isCancelable: false
+      }
+      DialogProgress.show(options)
+
       fetch(base_url + 'register_check', {
         method: 'POST',
         headers: {
@@ -334,6 +344,8 @@ export default class App extends Component {
           this.setState({
             loading: false
           });
+
+          DialogProgress.hide()
 
           var bikedata = responseData.data;
 
@@ -370,6 +382,13 @@ ${mac_msg}
                       macAddr: mac_addr
                     };
 
+                    const options = {
+                      title: "กำลังประมวลผลข้อมูล",
+                      message: "โปรดรอสักครู่...",
+                      isCancelable: false
+                    }
+                    DialogProgress.show(options)
+
                     fetch(base_url + 'register_confirm', {
                       method: 'POST',
                       headers: {
@@ -380,6 +399,8 @@ ${mac_msg}
                     })
                       .then((response) => response.json())
                       .then((responseData) => {
+                        DialogProgress.hide()
+                        
                         if (responseData.code == 'SUCCESS') {
                           this.saveBikeKeytoAsync(bikedata.users_user, bikedata.bike_id, mac_addr)
                           Alert.alert(
@@ -503,6 +524,11 @@ ${mac_msg}
           {!updatesEnabled ?
             <TouchableOpacity
               onPress={async () => {
+                const numbers = interval(1000);
+
+                const takeFourNumbers = numbers.pipe(take(60));
+
+                takeFourNumbers.subscribe(x => console.log('Next: ', x));
                 if (await AsyncStorage.getItem('bike_key') && await AsyncStorage.getItem('user_id') && await AsyncStorage.getItem('mac_address')) {
                   Alert.alert(
                     'เตรียมการเปิดการติดตาม',
