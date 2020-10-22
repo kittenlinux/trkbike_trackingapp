@@ -104,12 +104,10 @@ export default class App extends Component {
         Geolocation.getCurrentPosition(
           (position) => {
             this.setState({ loading: false });
-            console.log(position);
             resolve(position);
           },
           (error) => {
             this.setState({ loading: false });
-            console.log(error);
             resolve(error);
           },
           {
@@ -222,7 +220,6 @@ export default class App extends Component {
         },
         (error) => {
           this.setState({ location: error });
-          console.log(error);
         },
         {
           enableHighAccuracy: this.state.highAccuracy,
@@ -308,7 +305,7 @@ export default class App extends Component {
         'ออกจากโปรแกรม',
         'คุณต้องการออกไปยังหน้าหลักหรือไม่ ?',
         [
-          { text: 'ไม่ใช่', onPress: () => console.log('ยกเลิก'), style: 'cancel' },
+          { text: 'ไม่ใช่', style: 'cancel' },
           {
             text: 'ใช่', onPress: () => {
               BackHandler.exitApp()
@@ -432,7 +429,7 @@ ${mac_msg}
                       })
                   }
                 },
-                { text: 'ยกเลิก', onPress: () => console.log('ยกเลิก'), style: 'cancel' },
+                { text: 'ยกเลิก', style: 'cancel' },
               ],
               { cancelable: false }
             );
@@ -658,7 +655,6 @@ ${mac_msg}
       this.watchId = Geolocation.watchPosition(
         (position) => {
           this.setState({ location: position });
-          console.log(`11 : ${position}`);
           trkdata_thief = {
             bikeId: bike_key,
             user: user_id, macAddr:
@@ -686,7 +682,6 @@ ${mac_msg}
         },
         (error) => {
           this.setState({ location: error });
-          console.log(error);
         },
         {
           enableHighAccuracy: this.state.highAccuracy,
@@ -730,7 +725,7 @@ ${mac_msg}
                     'เตรียมการเปิดการติดตาม',
                     'โปรดวางโทรศัพท์ไว้ในรถจักรยานยนต์ เมื่อท่านวางโทรศัพท์เรียบร้อยแล้ว กรุณากดปุ่มยืนยัน',
                     [
-                      { text: 'ยกเลิก', onPress: () => console.log('ยกเลิก'), style: 'cancel' },
+                      { text: 'ยกเลิก', style: 'cancel' },
                       {
                         text: 'ยืนยัน', onPress: async () => {
                           const calib = await this.calibrateGyroscope()
