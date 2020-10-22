@@ -607,44 +607,45 @@ ${mac_msg}
       else {
         this.setState({ event_count: -1 })
       }
-      if (this.state.event_count === 29) async () => {
+      if (this.state.event_count === 29) {
         this.stopDetect();
-
-        const locat = await this.getLocation();
-        var trkdata_detect = await this.formTrackData(locat.coords.latitude, locat.coords.longitude, '201')
-
-        fetch(base_url + 'track', {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(trkdata_detect),
-        })
-          .then((response) => response.json())
-          .then((responseData) => {
-            if (responseData.code == 'SUCCESS') {
-              Alert.alert(
-                'สำเร็จ',
-                responseData.message
-              );
-            }
-            else if (responseData.code == 'FAIL') {
-              Alert.alert(
-                'ผิดพลาด',
-                `${responseData.message}
-
-โปรดตรวจสอบข้อมูลอีกครั้ง`
-              );
-            }
-          })
+        this.alertDetection();
       }
-    }
-    );
+    });
   }
-
   stopDetect = () => {
     detectgyro.unsubscribe()
+  }
+
+  alertDetection = async () => {
+    const locat = await this.getLocation();
+    var trkdata_detect = await this.formTrackData(locat.coords.latitude, locat.coords.longitude, '201')
+
+    fetch(base_url + 'track', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(trkdata_detect),
+    })
+      .then((response) => response.json())
+      .then((responseData) => {
+        if (responseData.code == 'SUCCESS') {
+          Alert.alert(
+            'สำเร็จ',
+            responseData.message
+          );
+        }
+        else if (responseData.code == 'FAIL') {
+          Alert.alert(
+            'ผิดพลาด',
+            `${responseData.message}
+
+โปรดตรวจสอบข้อมูลอีกครั้ง`
+          );
+        }
+      })
   }
 
   render() {
