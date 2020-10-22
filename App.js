@@ -15,6 +15,7 @@ import appConfig from './app.json';
 
 let base_url = 'https://www.trackmycars.net/bike/Api/V1/';
 let calibrate;
+let detectgyro;
 
 export default class App extends Component {
   constructor() {
@@ -45,7 +46,8 @@ export default class App extends Component {
       z_low: 0,
       x_high: 0,
       y_high: 0,
-      z_high: 0
+      z_high: 0,
+      event_count: 0
     };
   }
 
@@ -188,6 +190,8 @@ export default class App extends Component {
     let user_id = await AsyncStorage.getItem('user_id');
     let mac_address = await AsyncStorage.getItem('mac_address');
 
+    this.detectGyroscope();
+
     this.setState({ updatesEnabled: true }, () => {
       this.watchId = Geolocation.watchPosition(
         (position) => {
@@ -266,6 +270,8 @@ export default class App extends Component {
     if (this.state.foregroundService) {
       VIForegroundService.stopService().catch((err) => err);
     }
+
+    this.stopDetect();
 
     const locat = await this.getLocation();
     var trkdata_stop = await this.formTrackData(locat.coords.latitude, locat.coords.longitude, '302')
@@ -579,6 +585,68 @@ ${mac_msg}
     calibrate.unsubscribe()
   }
 
+  detectGyroscope = () => {
+    detectgyro = gyroscope.subscribe(({ x, y, z, timestamp }) => {
+      this.setState({
+        x: x,
+        y: y,
+        z: z
+      })
+      if (this.state.x < this.state.x_low)
+        this.setState({ event_count: this.state.event_count + 1 })
+      else if (this.state.x > this.state.x_high)
+        this.setState({ event_count: this.state.event_count + 1 })
+      else if (this.state.y < this.state.y_low)
+        this.setState({ event_count: this.state.event_count + 1 })
+      else if (this.state.y > this.state.y_high)
+        this.setState({ event_count: this.state.event_count + 1 })
+      else if (this.state.z < this.state.z_low)
+        this.setState({ event_count: this.state.event_count + 1 })
+      else if (this.state.z > this.state.z_high)
+        this.setState({ event_count: this.state.event_count + 1 })
+      else {
+        this.setState({ event_count: -1 })
+      }
+      if (this.state.event_count === 29) async () => {
+        this.stopDetect();
+
+        const locat = await this.getLocation();
+        var trkdata_detect = await this.formTrackData(locat.coords.latitude, locat.coords.longitude, '201')
+
+        fetch(base_url + 'track', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(trkdata_detect),
+        })
+          .then((response) => response.json())
+          .then((responseData) => {
+            if (responseData.code == 'SUCCESS') {
+              Alert.alert(
+                'สำเร็จ',
+                responseData.message
+              );
+            }
+            else if (responseData.code == 'FAIL') {
+              Alert.alert(
+                'ผิดพลาด',
+                `${responseData.message}
+
+โปรดตรวจสอบข้อมูลอีกครั้ง`
+              );
+            }
+          })
+      }
+    }
+    );
+  }
+
+  stopDetect = () => {
+    detectgyro.unsubscribe()
+  }
+
   render() {
     const {
       forceLocation,
@@ -646,6 +714,7 @@ ${mac_msg}
           <Text style={{ fontSize: 12 }}>X: {this.state.x}{"\n"}Y: {this.state.y}{"\n"}Z: {this.state.z}</Text>
           <Text style={{ fontSize: 12 }}>X low: {this.state.x_low}{"\n"}Y low: {this.state.y_low}{"\n"}Z low: {this.state.z_low}</Text>
           <Text style={{ fontSize: 12 }}>X high: {this.state.x_high}{"\n"}Y high: {this.state.y_high}{"\n"}Z high: {this.state.z_high}</Text>
+          <Text style={{ fontSize: 12 }}>Event Count: {this.state.event_count}</Text>
         </View>
       );
     }
@@ -671,7 +740,6 @@ ${mac_msg}
 }
 
 const styles = StyleSheet.create({
-
   MainContainer: {
     flex: 1,
     paddingTop: (Platform.OS) === 'ios' ? 20 : 0,
