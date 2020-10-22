@@ -10,13 +10,10 @@ import {
   setUpdateIntervalForType,
   SensorTypes
 } from "react-native-sensors";
-import { interval } from 'rxjs';
-import { take } from 'rxjs/operators';
 import DialogProgress from 'react-native-dialog-progress'
 import appConfig from './app.json';
 
 let base_url = 'https://www.trackmycars.net/bike/Api/V1/';
-let subscription;
 let calibrate;
 
 export default class App extends Component {
@@ -57,33 +54,10 @@ export default class App extends Component {
     this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
 
     this.getDeviceInfo();
-
-    subscription = gyroscope.subscribe(({ x, y, z, timestamp }) => {
-      // console.log({ x, y, z, timestamp })
-      if (x <= this.state.x_low)
-        this.setState({ x_low: x })
-      else if (x >= this.state.x_high)
-        this.setState({ x_high: x })
-      if (y <= this.state.y_low)
-        this.setState({ y_low: y })
-      else if (y >= this.state.y_high)
-        this.setState({ y_high: y })
-      if (z <= this.state.z_low)
-        this.setState({ z_low: z })
-      else if (z >= this.state.z_high)
-        this.setState({ z_high: z })
-      this.setState({
-        x: x,
-        y: y,
-        z: z
-      })
-    }
-    );
   }
 
   componentWillUnmount() {
     this.backHandler.remove();
-    subscription.unsubscribe();
   }
 
   hasLocationPermission = async () => {
@@ -123,28 +97,52 @@ export default class App extends Component {
   };
 
   getLocation = async () => {
-    this.setState({ loading: true }, () => {
-      Geolocation.getCurrentPosition(
-        (position) => {
-          this.setState({ location_onetime: position, loading: false });
-          console.log(position);
-          return position;
-        },
-        (error) => {
-          this.setState({ location_onetime: error, loading: false });
-          console.log(error);
-        },
-        {
-          enableHighAccuracy: this.state.highAccuracy,
-          timeout: 10000,
-          maximumAge: 5000,
-          distanceFilter: 0,
-          forceRequestLocation: this.state.forceLocation,
-          showLocationDialog: this.state.showLocationDialog,
-        }
-      );
+    const promise = new Promise((resolve, reject) => {
+      this.setState({ loading: true }, () => {
+        Geolocation.getCurrentPosition(
+          (position) => {
+            this.setState({ loading: false });
+            console.log(position);
+            resolve(position);
+          },
+          (error) => {
+            this.setState({ loading: false });
+            console.log(error);
+            resolve(error);
+          },
+          {
+            enableHighAccuracy: this.state.highAccuracy,
+            timeout: 10000,
+            maximumAge: 5000,
+            distanceFilter: 0,
+            forceRequestLocation: this.state.forceLocation,
+            showLocationDialog: this.state.showLocationDialog,
+          }
+        );
+      });
     });
+    const result = await promise;
+    return result;
   };
+
+  formTrackData = async (lat, lng, event) => {
+    const bikeId = await AsyncStorage.getItem('bike_key');
+    const user = await AsyncStorage.getItem('user_id');
+    const macAddr = await AsyncStorage.getItem('mac_address');
+    const promise = new Promise((resolve, reject) => {
+      var res = {
+        bikeId: bikeId,
+        user: user,
+        macAddr: macAddr,
+        lat: lat,
+        lng: lng,
+        event: event
+      }
+      resolve(res)
+    });
+    const result = await promise;
+    return result;
+  }
 
   getLocationUpdates = async () => {
     const hasLocationPermission = await this.hasLocationPermission();
@@ -153,14 +151,10 @@ export default class App extends Component {
       return;
     }
 
-    this.getLocation().then(trkdata_start = {
-      bikeId: await AsyncStorage.getItem('bike_key'),
-      user: await AsyncStorage.getItem('user_id'), macAddr:
-        await AsyncStorage.getItem('mac_address'),
-      lat: this.state.location_onetime.coords.latitude,
-      lng: this.state.location_onetime.coords.longitude,
-      event: '301'
-    }).then(fetch(base_url + 'track', {
+    const locat = await this.getLocation();
+    var trkdata_start = await this.formTrackData(locat.coords.latitude, locat.coords.longitude, '301')
+
+    fetch(base_url + 'track', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -184,7 +178,7 @@ export default class App extends Component {
 โปรดตรวจสอบข้อมูลอีกครั้ง`
           );
         }
-      }))
+      })
 
     if (Platform.OS === 'android' && this.state.foregroundService) {
       await this.startForegroundService();
@@ -273,16 +267,8 @@ export default class App extends Component {
       VIForegroundService.stopService().catch((err) => err);
     }
 
-    this.getLocation().then(console.log(this.state.location_onetime));
-
-    var trkdata_stop = {
-      bikeId: await AsyncStorage.getItem('bike_key'),
-      user: await AsyncStorage.getItem('user_id'), macAddr:
-        await AsyncStorage.getItem('mac_address'),
-      lat: this.state.location.coords.latitude,
-      lng: this.state.location.coords.longitude,
-      event: '302'
-    };
+    const locat = await this.getLocation();
+    var trkdata_stop = await this.formTrackData(locat.coords.latitude, locat.coords.longitude, '302')
 
     fetch(base_url + 'track', {
       method: 'POST',
@@ -424,11 +410,11 @@ ${mac_msg}
 
                         if (responseData.code == 'SUCCESS') {
                           this.saveBikeDatatoAsync(bikedata.users_user, bikedata.bike_id, mac_addr, bikedata.username, bikedata.plate, bikedata.model, bikedata.color)
+                          this.getDeviceInfo();
                           Alert.alert(
                             'สำเร็จ',
                             responseData.message
                           );
-                          this.getDeviceInfo()
                         }
                         else if (responseData.code == 'FAIL') {
                           Alert.alert(
@@ -533,6 +519,66 @@ ${mac_msg}
     this.setState({ Start_Scanner: false });
   }
 
+  calibrateGyroscope = async () => {
+    const promise = new Promise((resolve, reject) => {
+      const options = {
+        title: "กำลังปรับค่าไจโรสโคป",
+        message: "โปรดรอสักครู่...",
+        isCancelable: false
+      }
+      DialogProgress.show(options)
+      let test = 0;
+      calibrate = gyroscope.subscribe(({ x, y, z, timestamp }) => {
+        if (test === 0) {
+          this.setState({
+            x_low: x,
+            y_low: y,
+            z_low: z,
+            x_high: x,
+            y_high: y,
+            z_high: z,
+          })
+          this.setState({
+            x: x,
+            y: y,
+            z: z
+          })
+          test++;
+        } else {
+          if (x <= this.state.x_low)
+            this.setState({ x_low: x })
+          else if (x >= this.state.x_high)
+            this.setState({ x_high: x })
+          if (y <= this.state.y_low)
+            this.setState({ y_low: y })
+          else if (y >= this.state.y_high)
+            this.setState({ y_high: y })
+          if (z <= this.state.z_low)
+            this.setState({ z_low: z })
+          else if (z >= this.state.z_high)
+            this.setState({ z_high: z })
+          this.setState({
+            x: x,
+            y: y,
+            z: z
+          })
+          test++;
+          if (test === 30) {
+            this.stopCalibrate();
+            DialogProgress.hide()
+            resolve(test);
+          }
+        }
+      }
+      );
+    });
+    const result = await promise;
+  }
+
+  stopCalibrate = () => {
+    calibrate.unsubscribe()
+  }
+
   render() {
     const {
       forceLocation,
@@ -564,11 +610,6 @@ ${mac_msg}
           {!updatesEnabled ?
             <TouchableOpacity
               onPress={async () => {
-                const numbers = interval(1000);
-
-                const takeFourNumbers = numbers.pipe(take(60));
-
-                takeFourNumbers.subscribe(x => console.log('Next: ', x));
                 if (await AsyncStorage.getItem('bike_key') && await AsyncStorage.getItem('user_id') && await AsyncStorage.getItem('mac_address')) {
                   Alert.alert(
                     'เตรียมการเปิดการติดตาม',
@@ -576,8 +617,8 @@ ${mac_msg}
                     [
                       { text: 'ยกเลิก', onPress: () => console.log('ยกเลิก'), style: 'cancel' },
                       {
-                        text: 'ยืนยัน', onPress: () => {
-
+                        text: 'ยืนยัน', onPress: async () => {
+                          const calib = await this.calibrateGyroscope()
                           this.getLocationUpdates()
                         }
                       },
