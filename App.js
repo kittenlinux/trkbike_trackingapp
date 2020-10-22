@@ -190,7 +190,7 @@ export default class App extends Component {
     let user_id = await AsyncStorage.getItem('user_id');
     let mac_address = await AsyncStorage.getItem('mac_address');
 
-    this.detectGyroscope(bike_key, user_id, mac_address);
+    this.detectGyroscope();
 
     this.setState({ updatesEnabled: true }, () => {
       this.watchId = Geolocation.watchPosition(
