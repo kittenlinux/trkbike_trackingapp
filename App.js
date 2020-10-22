@@ -248,7 +248,7 @@ export default class App extends Component {
       await VIForegroundService.createNotificationChannel({
         id: 'locationChannel',
         name: 'Location Tracking Channel',
-        description: 'Tracks location of user',
+        description: 'ติดตามและตรวจจับการโจรกรรมของผู้ใช้',
         enableVibration: false,
       });
     }
@@ -257,7 +257,7 @@ export default class App extends Component {
       channelId: 'locationChannel',
       id: 420,
       title: appConfig.displayName,
-      text: 'Tracking location updates',
+      text: 'กำลังติดตามและตรวจจับการโจรกรรม',
       icon: 'ic_launcher',
     });
   };
