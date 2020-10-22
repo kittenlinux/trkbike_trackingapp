@@ -190,13 +190,12 @@ export default class App extends Component {
     let user_id = await AsyncStorage.getItem('user_id');
     let mac_address = await AsyncStorage.getItem('mac_address');
 
-    this.detectGyroscope();
+    this.detectGyroscope(bike_key, user_id, mac_address);
 
     this.setState({ updatesEnabled: true }, () => {
       this.watchId = Geolocation.watchPosition(
         (position) => {
           this.setState({ location: position });
-          console.log(position);
           trkdata_start = {
             bikeId: bike_key,
             user: user_id, macAddr:
@@ -228,8 +227,8 @@ export default class App extends Component {
         {
           enableHighAccuracy: this.state.highAccuracy,
           distanceFilter: 50,
-          interval: 30000,
-          fastestInterval: 15000,
+          interval: 60000,
+          fastestInterval: 30000,
           forceRequestLocation: this.state.forceLocation,
           showLocationDialog: this.state.showLocationDialog,
           useSignificantChanges: this.state.significantChanges,
@@ -620,6 +619,9 @@ ${mac_msg}
   alertDetection = async () => {
     const locat = await this.getLocation();
     var trkdata_detect = await this.formTrackData(locat.coords.latitude, locat.coords.longitude, '201')
+    let bike_key = await AsyncStorage.getItem('bike_key');
+    let user_id = await AsyncStorage.getItem('user_id');
+    let mac_address = await AsyncStorage.getItem('mac_address');
 
     fetch(base_url + 'track', {
       method: 'POST',
@@ -646,18 +648,62 @@ ${mac_msg}
           );
         }
       })
+
+    if (this.watchId !== null) {
+      Geolocation.clearWatch(this.watchId);
+      this.watchId = null;
+    }
+
+    this.setState({ updatesEnabled: true }, () => {
+      this.watchId = Geolocation.watchPosition(
+        (position) => {
+          this.setState({ location: position });
+          console.log(`11 : ${position}`);
+          trkdata_thief = {
+            bikeId: bike_key,
+            user: user_id, macAddr:
+              mac_address,
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            event: '11'
+          }
+          fetch(base_url + 'track', {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(trkdata_thief),
+          })
+            .then((response) => response.json())
+            .then((responseData) => {
+              if (responseData.code == 'SUCCESS') {
+
+              }
+              else if (responseData.code == 'FAIL') {
+              }
+            })
+        },
+        (error) => {
+          this.setState({ location: error });
+          console.log(error);
+        },
+        {
+          enableHighAccuracy: this.state.highAccuracy,
+          distanceFilter: 50,
+          interval: 30000,
+          fastestInterval: 15000,
+          forceRequestLocation: this.state.forceLocation,
+          showLocationDialog: this.state.showLocationDialog,
+          useSignificantChanges: this.state.significantChanges,
+        },
+      );
+    });
   }
 
   render() {
     const {
-      forceLocation,
-      highAccuracy,
-      loading,
-      location,
-      showLocationDialog,
-      significantChanges,
       updatesEnabled,
-      foregroundService,
       deviceInfo
     } = this.state;
 
