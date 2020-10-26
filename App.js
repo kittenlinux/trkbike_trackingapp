@@ -709,12 +709,9 @@ ${mac_msg}
     } = this.state;
 
     if (!this.state.Start_Scanner) {
-
       return (
         <View style={styles.MainContainer}>
-
           <Text style={{ fontSize: 22, textAlign: 'center' }}>ยินดีต้อนรับสู่ ลูกข่ายติดตามรถจักรยานยนต์ Track My Bikes</Text>
-
           <TouchableOpacity
             onPress={this.open_QR_Code_Scanner}
             style={styles.button}>
@@ -722,7 +719,6 @@ ${mac_msg}
               สแกนคิวอาร์โค้ด
             </Text>
           </TouchableOpacity>
-
           {!updatesEnabled ?
             <TouchableOpacity
               onPress={async () => {
