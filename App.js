@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Alert, BackHandler, PermissionsAndroid, Platform, StyleSheet, Text, TouchableOpacity, View, Button } from 'react-native';
+import { Alert, BackHandler, PermissionsAndroid, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { CameraKitCameraScreen } from 'react-native-camera-kit';
 import DeviceInfo from 'react-native-device-info';
 import AsyncStorage from '@react-native-community/async-storage';
