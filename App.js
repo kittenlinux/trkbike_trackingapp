@@ -615,6 +615,7 @@ ${mac_msg}
       }
     });
   }
+  
   stopDetect = () => {
     detectgyro.unsubscribe()
   }
