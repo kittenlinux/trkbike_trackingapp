@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Alert, BackHandler, PermissionsAndroid, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, BackHandler, PermissionsAndroid, Platform, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from 'react-native';
 import { CameraKitCameraScreen } from 'react-native-camera-kit';
 import DeviceInfo from 'react-native-device-info';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -79,12 +79,12 @@ export default class App extends Component {
     }
     if (status === PermissionsAndroid.RESULTS.DENIED) {
       ToastAndroid.show(
-        'Location permission denied by user.',
+        'การขอสิทธิ์เพื่อใช้งานตำแหน่งถูกปฏิเสธโดยผู้ใช้',
         ToastAndroid.LONG,
       );
     } else if (status === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
       ToastAndroid.show(
-        'Location permission revoked by user.',
+        'การขอสิทธิ์เพื่อใช้งานตำแหน่งถูกยกเลิกโดยผู้ใช้',
         ToastAndroid.LONG,
       );
     }
@@ -140,6 +140,7 @@ export default class App extends Component {
   getLocationUpdates = async () => {
     const hasLocationPermission = await this.hasLocationPermission();
     if (!hasLocationPermission) {
+      this.stopForegroundService();
       return;
     }
     const options = {
@@ -530,11 +531,15 @@ ${mac_msg}
             that.setState({ QR_Code_Value: '' });
             that.setState({ Start_Scanner: true });
           } else {
-            Alert.alert("ผิดพลาด", "การขอสิทธิ์เพื่อใช้งานกล้องถูกปฏิเสธ");
+            ToastAndroid.show(
+              'การขอสิทธิ์เพื่อใช้งานกล้องถูกปฏิเสธโดยผู้ใช้',
+              ToastAndroid.LONG,
+            );
           }
         } catch (err) {
-          Alert.alert("ผิดพลาด", "พบปัญหาในการขอสิทธิ์เพื่อใช้งานกล้อง");
-          console.warn(err);
+          Alert.alert("ผิดพลาด", `${err}
+
+พบปัญหาในการขอสิทธิ์เพื่อใช้งานกล้อง`);
         }
       }
       requestCameraPermission();
@@ -770,13 +775,15 @@ ${mac_msg}
       return (
         <View style={styles.MainContainer}>
           <Text style={{ fontSize: 22, textAlign: 'center' }}>ยินดีต้อนรับสู่ ลูกข่ายติดตามรถจักรยานยนต์ Track My Bikes</Text>
-          <TouchableOpacity
-            onPress={this.open_QR_Code_Scanner}
-            style={styles.button}>
-            <Text style={{ color: '#FFF', fontSize: 14 }}>
-              สแกนคิวอาร์โค้ด
+          {!updatesEnabled ?
+            <TouchableOpacity
+              onPress={this.open_QR_Code_Scanner}
+              style={styles.button}>
+              <Text style={{ color: '#FFF', fontSize: 14 }}>
+                สแกนคิวอาร์โค้ด
             </Text>
-          </TouchableOpacity>
+            </TouchableOpacity>
+            : null}
           {!updatesEnabled ?
             <TouchableOpacity
               onPress={async () => {
