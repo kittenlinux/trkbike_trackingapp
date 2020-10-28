@@ -45,7 +45,9 @@ export default class App extends Component {
       x_high: 0,
       y_high: 0,
       z_high: 0,
-      event_count: 0
+      event_count: 0,
+      calibrate_count: 29,
+      real_count: 29
     };
   }
 
@@ -304,7 +306,6 @@ export default class App extends Component {
     DialogProgress.show(options)
     const locat = await this.getLocation();
     DialogProgress.hide()
-
     if (locat.code) {
       Alert.alert(
         'ผิดพลาด',
@@ -651,7 +652,7 @@ ${mac_msg}
             z: z
           })
           test++;
-          if (test === 30) {
+          if (test === this.state.calibrate_count) {
             this.stopCalibrate();
             DialogProgress.hide()
             resolve(test);
@@ -689,7 +690,7 @@ ${mac_msg}
       else {
         this.setState({ event_count: -1 })
       }
-      if (this.state.event_count === 29) {
+      if (this.state.event_count === this.state.real_count) {
         this.stopDetect();
         this.alertDetection();
       }
