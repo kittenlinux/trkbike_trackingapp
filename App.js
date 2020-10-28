@@ -223,6 +223,7 @@ export default class App extends Component {
             );
           }
         }).catch((error) => {
+          DialogProgress.hide()
           Alert.alert(
             'ผิดพลาด',
             `${error}
@@ -361,6 +362,7 @@ export default class App extends Component {
             this.stopForegroundService();
           }
         }).catch((error) => {
+          DialogProgress.hide()
           Alert.alert(
             'ผิดพลาด',
             `${error}
@@ -489,7 +491,6 @@ ${mac_msg}
                       .then((response) => response.json())
                       .then(async (responseData) => {
                         DialogProgress.hide()
-
                         if (responseData.code == 'SUCCESS') {
                           let savedata = await this.saveBikeDatatoAsync(bikedata.users_user, bikedata.bike_id, mac_addr, bikedata.username, bikedata.plate, bikedata.model, bikedata.color)
                           this.getDeviceInfo();
@@ -507,6 +508,7 @@ ${mac_msg}
                           );
                         }
                       }).catch((error) => {
+                        DialogProgress.hide()
                         Alert.alert(
                           'ผิดพลาด',
                           `${error}
@@ -528,6 +530,7 @@ ${mac_msg}
             );
           }
         }).catch((error) => {
+          DialogProgress.hide()
           Alert.alert(
             'ผิดพลาด',
             `${error}
