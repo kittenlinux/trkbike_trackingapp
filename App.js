@@ -324,6 +324,13 @@ export default class App extends Component {
     } else {
       var trkdata_stop = await this.formTrackData(locat.coords.latitude, locat.coords.longitude, '302')
 
+      const options = {
+        title: "กำลังประมวลผลข้อมูล",
+        message: "โปรดรอสักครู่...",
+        isCancelable: false
+      }
+      DialogProgress.show(options)
+
       fetch(base_url + 'track', {
         method: 'POST',
         headers: {
@@ -334,6 +341,7 @@ export default class App extends Component {
       })
         .then((response) => response.json())
         .then((responseData) => {
+          DialogProgress.hide()
           if (responseData.code == 'SUCCESS') {
             Alert.alert(
               'สำเร็จ',
