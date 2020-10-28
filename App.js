@@ -151,7 +151,14 @@ export default class App extends Component {
       return;
     }
 
+    const options = {
+      title: "กำลังอ่านค่าตำแหน่ง",
+      message: "โปรดรอสักครู่...",
+      isCancelable: false
+    }
+    DialogProgress.show(options)
     const locat = await this.getLocation();
+    DialogProgress.hide()
 
     if (locat.code) {
       Alert.alert(
@@ -298,8 +305,14 @@ export default class App extends Component {
     }
 
     this.stopDetect();
-
+    const options = {
+      title: "กำลังอ่านค่าตำแหน่ง",
+      message: "โปรดรอสักครู่...",
+      isCancelable: false
+    }
+    DialogProgress.show(options)
     const locat = await this.getLocation();
+    DialogProgress.hide()
 
     if (locat.code) {
       Alert.alert(
@@ -794,7 +807,20 @@ ${mac_msg}
             </Text>
             </TouchableOpacity> :
             <TouchableOpacity
-              onPress={() => this.removeLocationUpdates()} disabled={!updatesEnabled}
+              onPress={() => {
+                Alert.alert(
+                  'ยืนยัน',
+                  'กรุณากดปุ่มยืนยันเพื่อปิดการติดตาม',
+                  [
+                    { text: 'ยกเลิก', style: 'cancel' },
+                    {
+                      text: 'ยืนยัน', onPress: () => {
+                        this.removeLocationUpdates()
+                      }
+                    },
+                  ],
+                  { cancelable: true })
+              }} disabled={!updatesEnabled}
               style={styles.button_red}>
               <Text style={{ color: '#FFF', fontSize: 24 }}>
                 ปิดการติดตาม
