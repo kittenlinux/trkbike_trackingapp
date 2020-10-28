@@ -152,52 +152,71 @@ export default class App extends Component {
     }
 
     const locat = await this.getLocation();
-    var trkdata_start = await this.formTrackData(locat.coords.latitude, locat.coords.longitude, '301')
 
-    fetch(base_url + 'track', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(trkdata_start),
-    })
-      .then((response) => response.json())
-      .then(async (responseData) => {
-        if (responseData.code == 'SUCCESS') {
-          Alert.alert(
-            'สำเร็จ',
-            responseData.message
-          );
-          this.prepareTracking();
-        }
-        else if (responseData.code == 'DISABLED') {
-          Alert.alert(
-            'ผิดพลาด',
-            `${responseData.message}
+    if (locat.code) {
+      Alert.alert(
+        'ผิดพลาด',
+        `${locat.message}
+
+พบปัญหาในการอ่านค่าตำแหน่ง โปรดตรวจสอบอุปกรณ์`
+      );
+    } else {
+      var trkdata_start = await this.formTrackData(locat.coords.latitude, locat.coords.longitude, '301')
+
+      const options = {
+        title: "กำลังประมวลผลข้อมูล",
+        message: "โปรดรอสักครู่...",
+        isCancelable: false
+      }
+      DialogProgress.show(options)
+
+      fetch(base_url + 'track', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(trkdata_start),
+      })
+        .then((response) => response.json())
+        .then(async (responseData) => {
+          DialogProgress.hide()
+          if (responseData.code == 'SUCCESS') {
+            Alert.alert(
+              'สำเร็จ',
+              responseData.message
+            );
+            this.prepareTracking();
+          }
+          else if (responseData.code == 'DISABLED') {
+            Alert.alert(
+              'ผิดพลาด',
+              `${responseData.message}
 
 โปรดเปิดการใช้งานรถจักรยานยนต์ในระบบแล้วเปิดการติดตามอีกครั้ง`
-          );
-        }
-        else if (responseData.code == 'INVALID') {
-          let removedata = await this.removeBikeDatafromAsync()
-          this.getDeviceInfo();
-          Alert.alert(
-            'ผิดพลาด',
-            `${responseData.message}
+            );
+          }
+          else if (responseData.code == 'INVALID') {
+            let removedata = await this.removeBikeDatafromAsync()
+            this.getDeviceInfo();
+            Alert.alert(
+              'ผิดพลาด',
+              `${responseData.message}
 
 มีอุปกรณ์ใหม่ถูกใช้งานแทนที่แล้ว โปรดสแกนคิวอาร์โค้ดใหม่อีกครั้ง`
-          );
-        }
-        else if (responseData.code == 'FAIL') {
-          Alert.alert(
-            'ผิดพลาด',
-            `${responseData.message}
+            );
+          }
+          else if (responseData.code == 'FAIL') {
+            Alert.alert(
+              'ผิดพลาด',
+              `${responseData.message}
 
 โปรดตรวจสอบข้อมูลอีกครั้ง`
-          );
-        }
-      }).catch((error) => console.error(error))
+            );
+          }
+        }).catch((error) => console.error(error))
+    }
+
   };
 
   prepareTracking = async () => {
@@ -281,33 +300,43 @@ export default class App extends Component {
     this.stopDetect();
 
     const locat = await this.getLocation();
-    var trkdata_stop = await this.formTrackData(locat.coords.latitude, locat.coords.longitude, '302')
 
-    fetch(base_url + 'track', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(trkdata_stop),
-    })
-      .then((response) => response.json())
-      .then((responseData) => {
-        if (responseData.code == 'SUCCESS') {
-          Alert.alert(
-            'สำเร็จ',
-            responseData.message
-          );
-        }
-        else if (responseData.code == 'FAIL') {
-          Alert.alert(
-            'ผิดพลาด',
-            `${responseData.message}
+    if (locat.code) {
+      Alert.alert(
+        'ผิดพลาด',
+        `${locat.message}
+
+พบปัญหาในการอ่านค่าตำแหน่ง โปรดตรวจสอบอุปกรณ์`
+      );
+    } else {
+      var trkdata_stop = await this.formTrackData(locat.coords.latitude, locat.coords.longitude, '302')
+
+      fetch(base_url + 'track', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(trkdata_stop),
+      })
+        .then((response) => response.json())
+        .then((responseData) => {
+          if (responseData.code == 'SUCCESS') {
+            Alert.alert(
+              'สำเร็จ',
+              responseData.message
+            );
+          }
+          else if (responseData.code == 'FAIL') {
+            Alert.alert(
+              'ผิดพลาด',
+              `${responseData.message}
 
 โปรดตรวจสอบข้อมูลอีกครั้ง`
-          );
-        }
-      }).catch((error) => console.error(error))
+            );
+          }
+        }).catch((error) => console.error(error))
+    }
   };
 
   handleBackPress = () => {
@@ -400,6 +429,7 @@ ${mac_msg}
 
 ยืนยันการผูกอุปกรณ์เข้ากับรถจักรยานยนต์ ?`,
               [
+                { text: 'ยกเลิก', style: 'cancel' },
                 {
                   text: 'ยืนยัน', onPress: () => {
                     var bikedata_confirm = {
@@ -446,7 +476,6 @@ ${mac_msg}
                       })
                   }
                 },
-                { text: 'ยกเลิก', style: 'cancel' },
               ],
               { cancelable: false }
             );
