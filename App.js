@@ -21,7 +21,7 @@ export default class App extends Component {
   constructor() {
     super();
 
-    setUpdateIntervalForType(SensorTypes.gyroscope, 2000); // defaults to 100ms
+    setUpdateIntervalForType(SensorTypes.gyroscope, 2000);
 
     this.state = {
       QR_Code_Value: '',
@@ -163,13 +163,31 @@ export default class App extends Component {
       body: JSON.stringify(trkdata_start),
     })
       .then((response) => response.json())
-      .then((responseData) => {
+      .then(async (responseData) => {
         if (responseData.code == 'SUCCESS') {
           Alert.alert(
             'สำเร็จ',
             responseData.message
           );
           this.prepareTracking();
+        }
+        else if (responseData.code == 'DISABLED') {
+          Alert.alert(
+            'ผิดพลาด',
+            `${responseData.message}
+
+โปรดเปิดการใช้งานรถจักรยานยนต์ในระบบแล้วเปิดการติดตามอีกครั้ง`
+          );
+        }
+        else if (responseData.code == 'INVALID') {
+          let removedata = await this.removeBikeDatafromAsync()
+          this.getDeviceInfo();
+          Alert.alert(
+            'ผิดพลาด',
+            `${responseData.message}
+
+มีอุปกรณ์ใหม่ถูกใช้งานแทนที่แล้ว โปรดสแกนคิวอาร์โค้ดใหม่อีกครั้ง`
+          );
         }
         else if (responseData.code == 'FAIL') {
           Alert.alert(
@@ -653,10 +671,8 @@ ${mac_msg}
       .then((response) => response.json())
       .then((responseData) => {
         if (responseData.code == 'SUCCESS') {
-
         }
         else if (responseData.code == 'FAIL') {
-
         }
       }).catch((error) => console.error(error))
 
