@@ -286,7 +286,7 @@ export default class App extends Component {
       id: 420,
       title: appConfig.displayName,
       text: 'กำลังเฝ้าระวังและติดตามการโจรกรรม',
-      icon: 'ic_launcher',
+      icon: 'ic_stat_name',
     });
   };
 
