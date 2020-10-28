@@ -791,7 +791,7 @@ ${mac_msg}
               onPress={async () => {
                 if (await AsyncStorage.getItem('bike_key') && await AsyncStorage.getItem('user_id') && await AsyncStorage.getItem('mac_address')) {
                   Alert.alert(
-                    'เตรียมการเปิดการติดตาม',
+                    'เตรียมเริ่มการเฝ้าระวัง',
                     'โปรดวางโทรศัพท์ไว้ในรถจักรยานยนต์ เมื่อท่านวางโทรศัพท์เรียบร้อยแล้ว กรุณากดปุ่มยืนยัน',
                     [
                       { text: 'ยกเลิก', style: 'cancel' },
@@ -811,14 +811,14 @@ ${mac_msg}
               } disabled={updatesEnabled}
               style={styles.button}>
               <Text style={{ color: '#FFF', fontSize: 24 }}>
-                เปิดการติดตาม
+                เริ่มการเฝ้าระวัง
             </Text>
             </TouchableOpacity> :
             <TouchableOpacity
               onPress={() => {
                 Alert.alert(
                   'ยืนยัน',
-                  'กรุณากดปุ่มยืนยันเพื่อปิดการติดตาม',
+                  'กรุณากดปุ่มยืนยันเพื่อสิ้นสุดการเฝ้าระวัง',
                   [
                     { text: 'ยกเลิก', style: 'cancel' },
                     {
@@ -831,14 +831,10 @@ ${mac_msg}
               }} disabled={!updatesEnabled}
               style={styles.button_red}>
               <Text style={{ color: '#FFF', fontSize: 24 }}>
-                ปิดการติดตาม
+                สิ้นสุดการเฝ้าระวัง
           </Text>
             </TouchableOpacity>}
           <Text style={{ fontSize: 18, textAlign: 'center' }}>{deviceInfo}</Text>
-          {/* <Text style={{ fontSize: 12 }}>X: {this.state.x}{"\n"}Y: {this.state.y}{"\n"}Z: {this.state.z}</Text>
-          <Text style={{ fontSize: 12 }}>X low: {this.state.x_low}{"\n"}Y low: {this.state.y_low}{"\n"}Z low: {this.state.z_low}</Text>
-          <Text style={{ fontSize: 12 }}>X high: {this.state.x_high}{"\n"}Y high: {this.state.y_high}{"\n"}Z high: {this.state.z_high}</Text>
-          <Text style={{ fontSize: 12 }}>Event Count: {this.state.event_count}</Text> */}
         </View>
       );
     }
