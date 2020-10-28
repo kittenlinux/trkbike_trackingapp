@@ -20,9 +20,7 @@ let detectgyro;
 export default class App extends Component {
   constructor() {
     super();
-
     setUpdateIntervalForType(SensorTypes.gyroscope, 2000);
-
     this.state = {
       QR_Code_Value: '',
       Start_Scanner: false,
@@ -54,7 +52,6 @@ export default class App extends Component {
   componentDidMount() {
     DeviceInfo.getMacAddress().then(mac => { mac_addr = JSON.stringify(mac).slice(1, JSON.stringify(mac).length - 1); });
     this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
-
     this.getDeviceInfo();
   }
 
@@ -66,23 +63,18 @@ export default class App extends Component {
     if (Platform.OS === 'android' && Platform.Version < 23) {
       return true;
     }
-
     const hasPermission = await PermissionsAndroid.check(
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
     );
-
     if (hasPermission) {
       return true;
     }
-
     const status = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
     );
-
     if (status === PermissionsAndroid.RESULTS.GRANTED) {
       return true;
     }
-
     if (status === PermissionsAndroid.RESULTS.DENIED) {
       ToastAndroid.show(
         'Location permission denied by user.',
@@ -94,7 +86,6 @@ export default class App extends Component {
         ToastAndroid.LONG,
       );
     }
-
     return false;
   };
 
@@ -146,11 +137,9 @@ export default class App extends Component {
 
   getLocationUpdates = async () => {
     const hasLocationPermission = await this.hasLocationPermission();
-
     if (!hasLocationPermission) {
       return;
     }
-
     const options = {
       title: "กำลังอ่านค่าตำแหน่ง",
       message: "โปรดรอสักครู่...",
@@ -159,7 +148,6 @@ export default class App extends Component {
     DialogProgress.show(options)
     const locat = await this.getLocation();
     DialogProgress.hide()
-
     if (locat.code) {
       Alert.alert(
         'ผิดพลาด',
@@ -170,14 +158,12 @@ export default class App extends Component {
       this.stopForegroundService();
     } else {
       var trkdata_start = await this.formTrackData(locat.coords.latitude, locat.coords.longitude, '301')
-
       const options = {
         title: "กำลังประมวลผลข้อมูล",
         message: "โปรดรอสักครู่...",
         isCancelable: false
       }
       DialogProgress.show(options)
-
       fetch(base_url + 'track', {
         method: 'POST',
         headers: {
@@ -238,13 +224,11 @@ export default class App extends Component {
 
   prepareTracking = async () => {
     this.detectGyroscope();
-
     this.setState({ updatesEnabled: true }, () => {
       this.watchId = Geolocation.watchPosition(
         async (position) => {
           this.setState({ location: position });
           var trkdata_track = await this.formTrackData(position.coords.latitude, position.coords.longitude, '1')
-
           fetch(base_url + 'track', {
             method: 'POST',
             headers: {
@@ -295,7 +279,6 @@ export default class App extends Component {
         enableVibration: false,
       });
     }
-
     return VIForegroundService.startService({
       channelId: 'locationChannel',
       id: 420,
@@ -313,7 +296,6 @@ export default class App extends Component {
 
   stopTracking = async () => {
     this.stopDetect();
-
     const options = {
       title: "กำลังอ่านค่าตำแหน่ง",
       message: "โปรดรอสักครู่...",
@@ -332,14 +314,12 @@ export default class App extends Component {
       );
     } else {
       var trkdata_stop = await this.formTrackData(locat.coords.latitude, locat.coords.longitude, '302')
-
       const options = {
         title: "กำลังประมวลผลข้อมูล",
         message: "โปรดรอสักครู่...",
         isCancelable: false
       }
       DialogProgress.show(options)
-
       fetch(base_url + 'track', {
         method: 'POST',
         headers: {
@@ -402,7 +382,6 @@ export default class App extends Component {
 
   onQR_Code_Scan_Done = (QR_Code) => {
     var qrdata, isJSON = '1';
-
     try {
       qrdata = JSON.parse(QR_Code);
     }
@@ -410,17 +389,14 @@ export default class App extends Component {
       Alert.alert('ผิดพลาด', 'รูปแบบคิวอาร์โค้ดไม่ถูกต้อง โปรดตรวจสอบข้อมูลอีกครั้ง');
       isJSON = '0';
     }
-
     if (isJSON == '1') {
       qrdata.macAddr = mac_addr;
-
       const options = {
         title: "กำลังประมวลผลข้อมูล",
         message: "โปรดรอสักครู่...",
         isCancelable: false
       }
       DialogProgress.show(options)
-
       fetch(base_url + 'register_check', {
         method: 'POST',
         headers: {
@@ -434,11 +410,8 @@ export default class App extends Component {
           this.setState({
             loading: false
           });
-
           DialogProgress.hide()
-
           var bikedata = responseData.data;
-
           if (responseData.code == 'SUCCESS') {
             if (bikedata.mac_status === '0')
               var mac_msg = `ยังไม่มีการผูกอุปกรณ์ใด ๆ เข้ากับรถคันนี้
@@ -449,7 +422,6 @@ export default class App extends Component {
             else if (bikedata.mac_status === '2')
               var mac_msg = `มีการผูกอุปกรณ์อื่นเข้ากับรถจักรยานยนต์คันนี้อยู่แล้ว !
 ที่อยู่ MAC Address ${mac_addr} จะถูกผูกเข้ากับรถจักรยานยนต์คันนี้แทนที่อุปกรณ์เดิม`;
-
             Alert.alert(
               'ตรวจสอบข้อมูล',
               `${responseData.message}
@@ -472,14 +444,12 @@ ${mac_msg}
                       bikeId: bikedata.bike_id,
                       macAddr: mac_addr
                     };
-
                     const options = {
                       title: "กำลังประมวลผลข้อมูล",
                       message: "โปรดรอสักครู่...",
                       isCancelable: false
                     }
                     DialogProgress.show(options)
-
                     fetch(base_url + 'register_confirm', {
                       method: 'POST',
                       headers: {
@@ -539,14 +509,12 @@ ${mac_msg}
           );
         })
     }
-
     this.setState({ QR_Code_Value: QR_Code });
     this.setState({ Start_Scanner: false });
   }
 
   open_QR_Code_Scanner = () => {
     var that = this;
-
     if (Platform.OS === 'android') {
       async function requestCameraPermission() {
         try {
@@ -558,10 +526,8 @@ ${mac_msg}
           }
           )
           if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-
             that.setState({ QR_Code_Value: '' });
             that.setState({ Start_Scanner: true });
-
           } else {
             Alert.alert("ผิดพลาด", "การขอสิทธิ์เพื่อใช้งานกล้องถูกปฏิเสธ");
           }
@@ -623,7 +589,6 @@ ${mac_msg}
       let plate = await AsyncStorage.getItem('plate');
       let model = await AsyncStorage.getItem('model');
       let color = await AsyncStorage.getItem('color');
-
       var data = `
 ชื่อผู้ใช้ : ${username}
 หมายเลขทะเบียน : ${plate}
@@ -738,7 +703,6 @@ ${mac_msg}
   alertDetection = async () => {
     const locat = await this.getLocation();
     var trkdata_detect = await this.formTrackData(locat.coords.latitude, locat.coords.longitude, '201')
-
     fetch(base_url + 'track', {
       method: 'POST',
       headers: {
@@ -754,12 +718,10 @@ ${mac_msg}
         else if (responseData.code == 'FAIL') {
         }
       }).catch((error) => console.error(error))
-
     if (this.watchId !== null) {
       Geolocation.clearWatch(this.watchId);
       this.watchId = null;
     }
-
     this.setState({ updatesEnabled: true }, () => {
       this.watchId = Geolocation.watchPosition(
         async (position) => {
@@ -803,7 +765,6 @@ ${mac_msg}
       updatesEnabled,
       deviceInfo
     } = this.state;
-
     if (!this.state.Start_Scanner) {
       return (
         <View style={styles.MainContainer}>
@@ -873,7 +834,6 @@ ${mac_msg}
     return (
       <View style={{ flex: 1 }}>
         <Text style={{ fontWeight: 'bold', textAlign: 'center' }}>เปิดเว็บไซต์ trackmycars.net/bike ทำการเข้าสู่ระบบ และสแกนคิวอาร์โค้ดของรถจักรยานยนต์ที่ท่านต้องการใช้งาน</Text>
-
         <CameraKitCameraScreen
           showFrame={true}
           scanBarcode={true}
@@ -885,7 +845,6 @@ ${mac_msg}
           actions={{ leftButtonText: 'ยกเลิก' }}
           onBottomButtonPressed={(event) => this.onBottomButtonPressed(event)}
         />
-
       </View>
     );
   }
