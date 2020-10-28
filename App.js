@@ -406,11 +406,11 @@ ${mac_msg}
                       body: JSON.stringify(bikedata_confirm),
                     })
                       .then((response) => response.json())
-                      .then((responseData) => {
+                      .then(async (responseData) => {
                         DialogProgress.hide()
 
                         if (responseData.code == 'SUCCESS') {
-                          this.saveBikeDatatoAsync(bikedata.users_user, bikedata.bike_id, mac_addr, bikedata.username, bikedata.plate, bikedata.model, bikedata.color)
+                          let savedata = await this.saveBikeDatatoAsync(bikedata.users_user, bikedata.bike_id, mac_addr, bikedata.username, bikedata.plate, bikedata.model, bikedata.color)
                           this.getDeviceInfo();
                           Alert.alert(
                             'สำเร็จ',
@@ -481,31 +481,43 @@ ${mac_msg}
   }
 
   saveBikeDatatoAsync = async (user, bikeId, mac_addr, username, plate, model, color) => {
-    try {
-      await AsyncStorage.setItem('user_id', user)
-      await AsyncStorage.setItem('bike_key', bikeId)
-      await AsyncStorage.setItem('mac_address', mac_addr)
-      await AsyncStorage.setItem('username', username)
-      await AsyncStorage.setItem('plate', plate)
-      await AsyncStorage.setItem('model', model)
-      await AsyncStorage.setItem('color', color)
-    } catch (e) {
-      Alert.alert("ผิดพลาด", "พบปัญหาในการเก็บข้อมูลรถจักรยานยนต์ โปรดติดต่อผู้ดูแลระบบ");
-    }
+    const promise = new Promise(async (resolve, reject) => {
+      try {
+        await AsyncStorage.setItem('user_id', user)
+        await AsyncStorage.setItem('bike_key', bikeId)
+        await AsyncStorage.setItem('mac_address', mac_addr)
+        await AsyncStorage.setItem('username', username)
+        await AsyncStorage.setItem('plate', plate)
+        await AsyncStorage.setItem('model', model)
+        await AsyncStorage.setItem('color', color)
+        resolve('1')
+      } catch (e) {
+        Alert.alert("ผิดพลาด", "พบปัญหาในการเก็บข้อมูลรถจักรยานยนต์ โปรดติดต่อผู้ดูแลระบบ");
+        resolve('0')
+      }
+    });
+    const result = await promise;
+    return result;
   }
 
   removeBikeDatafromAsync = async () => {
-    try {
-      await AsyncStorage.removeItem('user_id')
-      await AsyncStorage.removeItem('bike_key')
-      await AsyncStorage.removeItem('mac_address')
-      await AsyncStorage.removeItem('username')
-      await AsyncStorage.removeItem('plate')
-      await AsyncStorage.removeItem('model')
-      await AsyncStorage.removeItem('color')
-    } catch (e) {
-      Alert.alert("ผิดพลาด", "พบปัญหาในการจัดการข้อมูลรถจักรยานยนต์ โปรดติดต่อผู้ดูแลระบบ");
-    }
+    const promise = new Promise(async (resolve, reject) => {
+      try {
+        await AsyncStorage.removeItem('user_id')
+        await AsyncStorage.removeItem('bike_key')
+        await AsyncStorage.removeItem('mac_address')
+        await AsyncStorage.removeItem('username')
+        await AsyncStorage.removeItem('plate')
+        await AsyncStorage.removeItem('model')
+        await AsyncStorage.removeItem('color')
+        resolve('1')
+      } catch (e) {
+        Alert.alert("ผิดพลาด", "พบปัญหาในการจัดการข้อมูลรถจักรยานยนต์ โปรดติดต่อผู้ดูแลระบบ");
+        resolve('0')
+      }
+    });
+    const result = await promise;
+    return result;
   }
 
   getDeviceInfo = async () => {
