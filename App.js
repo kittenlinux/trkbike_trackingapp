@@ -167,6 +167,7 @@ export default class App extends Component {
 
 พบปัญหาในการอ่านค่าตำแหน่ง โปรดตรวจสอบอุปกรณ์`
       );
+      this.stopForegroundService();
     } else {
       var trkdata_start = await this.formTrackData(locat.coords.latitude, locat.coords.longitude, '301')
 
@@ -221,16 +222,20 @@ export default class App extends Component {
 โปรดตรวจสอบข้อมูลอีกครั้ง`
             );
           }
-        }).catch((error) => console.error(error))
+        }).catch((error) => {
+          Alert.alert(
+            'ผิดพลาด',
+            `${error}
+
+พบปัญหาทางด้านเครือข่าย โปรดตรวจสอบอุปกรณ์`
+          );
+          this.stopForegroundService();
+        })
     }
 
   };
 
   prepareTracking = async () => {
-    if (Platform.OS === 'android' && this.state.foregroundService) {
-      await this.startForegroundService();
-    }
-
     this.detectGyroscope();
 
     this.setState({ updatesEnabled: true }, () => {
@@ -273,7 +278,7 @@ export default class App extends Component {
 
   removeLocationUpdates = async () => {
     if (this.watchId !== null) {
-      this.stopForegroundService();
+      this.stopTracking();
       Geolocation.clearWatch(this.watchId);
       this.watchId = null;
       this.setState({ updatesEnabled: false });
@@ -285,7 +290,7 @@ export default class App extends Component {
       await VIForegroundService.createNotificationChannel({
         id: 'locationChannel',
         name: 'Location Tracking Channel',
-        description: 'ติดตามและตรวจจับการโจรกรรมของผู้ใช้',
+        description: 'เฝ้าระวังและตรวจจับการโจรกรรมของผู้ใช้',
         enableVibration: false,
       });
     }
@@ -294,7 +299,7 @@ export default class App extends Component {
       channelId: 'locationChannel',
       id: 420,
       title: appConfig.displayName,
-      text: 'กำลังติดตามและตรวจจับการโจรกรรม',
+      text: 'กำลังเฝ้าระวังและติดตามการโจรกรรม',
       icon: 'ic_launcher',
     });
   };
@@ -303,8 +308,11 @@ export default class App extends Component {
     if (this.state.foregroundService) {
       VIForegroundService.stopService().catch((err) => err);
     }
+  }
 
+  stopTracking = async () => {
     this.stopDetect();
+
     const options = {
       title: "กำลังอ่านค่าตำแหน่ง",
       message: "โปรดรอสักครู่...",
@@ -347,16 +355,20 @@ export default class App extends Component {
               'สำเร็จ',
               responseData.message
             );
+            this.stopForegroundService();
           }
-          else if (responseData.code == 'FAIL') {
-            Alert.alert(
-              'ผิดพลาด',
-              `${responseData.message}
+          else {
+            this.stopForegroundService();
+          }
+        }).catch((error) => {
+          Alert.alert(
+            'ผิดพลาด',
+            `${error}
 
-โปรดตรวจสอบข้อมูลอีกครั้ง`
-            );
-          }
-        }).catch((error) => console.error(error))
+พบปัญหาทางด้านเครือข่าย โปรดตรวจสอบอุปกรณ์`
+          );
+          this.stopForegroundService();
+        })
     }
   };
 
@@ -797,6 +809,9 @@ ${mac_msg}
                       { text: 'ยกเลิก', style: 'cancel' },
                       {
                         text: 'ยืนยัน', onPress: async () => {
+                          if (Platform.OS === 'android' && this.state.foregroundService) {
+                            await this.startForegroundService();
+                          }
                           const calib = await this.calibrateGyroscope()
                           this.getLocationUpdates()
                         }
