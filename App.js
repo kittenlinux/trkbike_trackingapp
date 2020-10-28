@@ -169,6 +169,7 @@ export default class App extends Component {
             'สำเร็จ',
             responseData.message
           );
+          this.prepareTracking();
         }
         else if (responseData.code == 'FAIL') {
           Alert.alert(
@@ -178,37 +179,29 @@ export default class App extends Component {
 โปรดตรวจสอบข้อมูลอีกครั้ง`
           );
         }
-      })
+      }).catch((error) => console.error(error))
+  };
 
+  prepareTracking = async () => {
     if (Platform.OS === 'android' && this.state.foregroundService) {
       await this.startForegroundService();
     }
-
-    let bike_key = await AsyncStorage.getItem('bike_key');
-    let user_id = await AsyncStorage.getItem('user_id');
-    let mac_address = await AsyncStorage.getItem('mac_address');
 
     this.detectGyroscope();
 
     this.setState({ updatesEnabled: true }, () => {
       this.watchId = Geolocation.watchPosition(
-        (position) => {
+        async (position) => {
           this.setState({ location: position });
-          trkdata_start = {
-            bikeId: bike_key,
-            user: user_id, macAddr:
-              mac_address,
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-            event: '1'
-          }
+          var trkdata_track = await this.formTrackData(position.coords.latitude, position.coords.longitude, '1')
+
           fetch(base_url + 'track', {
             method: 'POST',
             headers: {
               Accept: 'application/json',
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(trkdata_start),
+            body: JSON.stringify(trkdata_track),
           })
             .then((response) => response.json())
             .then((responseData) => {
@@ -216,7 +209,7 @@ export default class App extends Component {
               }
               else if (responseData.code == 'FAIL') {
               }
-            })
+            }).catch((error) => console.error(error))
         },
         (error) => {
           this.setState({ location: error });
@@ -232,7 +225,7 @@ export default class App extends Component {
         },
       );
     });
-  };
+  }
 
   removeLocationUpdates = async () => {
     if (this.watchId !== null) {
@@ -296,7 +289,7 @@ export default class App extends Component {
 โปรดตรวจสอบข้อมูลอีกครั้ง`
           );
         }
-      })
+      }).catch((error) => console.error(error))
   };
 
   handleBackPress = () => {
@@ -447,8 +440,7 @@ ${mac_msg}
 โปรดตรวจสอบข้อมูลอีกครั้ง`
             );
           }
-
-        });
+        }).catch((error) => console.error(error))
     }
 
     this.setState({ QR_Code_Value: QR_Code });
@@ -499,6 +491,20 @@ ${mac_msg}
       await AsyncStorage.setItem('color', color)
     } catch (e) {
       Alert.alert("ผิดพลาด", "พบปัญหาในการเก็บข้อมูลรถจักรยานยนต์ โปรดติดต่อผู้ดูแลระบบ");
+    }
+  }
+
+  removeBikeDatafromAsync = async () => {
+    try {
+      await AsyncStorage.removeItem('user_id')
+      await AsyncStorage.removeItem('bike_key')
+      await AsyncStorage.removeItem('mac_address')
+      await AsyncStorage.removeItem('username')
+      await AsyncStorage.removeItem('plate')
+      await AsyncStorage.removeItem('model')
+      await AsyncStorage.removeItem('color')
+    } catch (e) {
+      Alert.alert("ผิดพลาด", "พบปัญหาในการจัดการข้อมูลรถจักรยานยนต์ โปรดติดต่อผู้ดูแลระบบ");
     }
   }
 
@@ -615,7 +621,7 @@ ${mac_msg}
       }
     });
   }
-  
+
   stopDetect = () => {
     detectgyro.unsubscribe()
   }
@@ -623,9 +629,6 @@ ${mac_msg}
   alertDetection = async () => {
     const locat = await this.getLocation();
     var trkdata_detect = await this.formTrackData(locat.coords.latitude, locat.coords.longitude, '201')
-    let bike_key = await AsyncStorage.getItem('bike_key');
-    let user_id = await AsyncStorage.getItem('user_id');
-    let mac_address = await AsyncStorage.getItem('mac_address');
 
     fetch(base_url + 'track', {
       method: 'POST',
@@ -638,20 +641,20 @@ ${mac_msg}
       .then((response) => response.json())
       .then((responseData) => {
         if (responseData.code == 'SUCCESS') {
-          Alert.alert(
-            'สำเร็จ',
-            responseData.message
-          );
+          // Alert.alert(
+          //   'สำเร็จ',
+          //   responseData.message
+          // );
         }
         else if (responseData.code == 'FAIL') {
-          Alert.alert(
-            'ผิดพลาด',
-            `${responseData.message}
+//           Alert.alert(
+//             'ผิดพลาด',
+//             `${responseData.message}
 
-โปรดตรวจสอบข้อมูลอีกครั้ง`
-          );
+// โปรดตรวจสอบข้อมูลอีกครั้ง`
+//           );
         }
-      })
+      }).catch((error) => console.error(error))
 
     if (this.watchId !== null) {
       Geolocation.clearWatch(this.watchId);
@@ -660,16 +663,9 @@ ${mac_msg}
 
     this.setState({ updatesEnabled: true }, () => {
       this.watchId = Geolocation.watchPosition(
-        (position) => {
+        async (position) => {
           this.setState({ location: position });
-          trkdata_thief = {
-            bikeId: bike_key,
-            user: user_id, macAddr:
-              mac_address,
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-            event: '11'
-          }
+          var trkdata_thief = await this.formTrackData(position.coords.latitude, position.coords.longitude, '11')
           fetch(base_url + 'track', {
             method: 'POST',
             headers: {
@@ -685,7 +681,7 @@ ${mac_msg}
               }
               else if (responseData.code == 'FAIL') {
               }
-            })
+            }).catch((error) => console.error(error))
         },
         (error) => {
           this.setState({ location: error });
