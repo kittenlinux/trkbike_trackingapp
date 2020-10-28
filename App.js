@@ -641,18 +641,10 @@ ${mac_msg}
       .then((response) => response.json())
       .then((responseData) => {
         if (responseData.code == 'SUCCESS') {
-          // Alert.alert(
-          //   'สำเร็จ',
-          //   responseData.message
-          // );
+
         }
         else if (responseData.code == 'FAIL') {
-//           Alert.alert(
-//             'ผิดพลาด',
-//             `${responseData.message}
 
-// โปรดตรวจสอบข้อมูลอีกครั้ง`
-//           );
         }
       }).catch((error) => console.error(error))
 
